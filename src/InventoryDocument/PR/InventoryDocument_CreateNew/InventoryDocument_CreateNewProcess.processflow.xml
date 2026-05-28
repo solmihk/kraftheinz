@@ -1,0 +1,32 @@
+<Process name="InventoryDocument::CreateNewProcess" defaultAction="StartNavigation_Order" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="BoInventoryDocument" type="BoInventoryDocument" />
+        <Declaration name="OrderTemplateId" type="DomPKey" />
+      </Declarations>
+      <Parameters>
+        <Input name="OrderTemplateId" type="DomPKey" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="CreateOrder" actionType="CREATE" type="BoInventoryDocument">
+        <Parameters>
+          <Input name="OrderTemplateId" value="ProcessContext::OrderTemplateId" />
+          <Input name="ResponsiblePKey" value="ApplicationContext::User.pKey" />
+        </Parameters>
+        <Return name="ProcessContext::BoInventoryDocument" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="StartNavigation_Order" actionType="PROCESS" process="InventoryDocument::NavigationProcess">
+        <Parameters>
+          <Input name="BoInventoryDocument" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+      </Action>
+      <Action name="End" actionType="END" />
+    </Actions>
+  </Body>
+</Process>

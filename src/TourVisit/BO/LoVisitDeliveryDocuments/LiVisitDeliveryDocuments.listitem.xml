@@ -1,0 +1,13 @@
+<ListItem name="LiVisitDeliveryDocuments">
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" storable="true" dataSourceProperty="pKey" />
+    <SimpleProperty name="name" type="DomId" storable="true" dataSourceProperty="name" />
+    <SimpleProperty name="phase" type="DomSdoPhase" storable="true" dataSourceProperty="phase" />
+    <SimpleProperty name="phaseIcon" type="DomString" storable="false" dataSourceProperty="phaseIcon" />
+    <SimpleProperty name="grossTotalValue" type="DomMoney" storable="true" dataSourceProperty="grossTotalValue" />
+    <SimpleProperty name="currency" type="DomCurrency" storable="false" dataSourceProperty="currency" />
+    <SimpleProperty name="documentTransactionType" type="DomBpaPaymentPolicy" storable="false" dataSourceProperty="documentTransactionType" />
+    <SimpleProperty name="orderType" type="DomString" storable="false" dataSourceProperty="orderType" /> 
+    <SimpleProperty name="customerId" type="DomPKey" storable="false" dataSourceProperty="customerId" />
+ </SimpleProperties>
+</ListItem>

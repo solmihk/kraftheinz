@@ -1,0 +1,76 @@
+<Process name="Tour::TourDocumentsProcess" defaultAction="loadTourDocumentsList" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="TourDocumentsList" type="LoTourDocuments" />
+        <Declaration name="TriggerReload" type="DomBool" />
+        <Declaration name="isVisible" type="DomBool" />
+        <!-- Create Checkin document-->
+        <Declaration name="CreateNewOrder_OrderTemplateId" type="DomPKey" />
+      </Declarations>
+      <Parameters>
+        <Input name="TourDataBo" type="BoTourData" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions />
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="loadTourDocumentsList" actionType="LOGIC" call="ProcessContext::TourDataBo.loadTourDocumentsOnDemand">
+        <TransitionTo action="CheckButtonVisibility" />
+      </Action>
+      <Action name="CheckButtonVisibility" actionType="LOGIC" call="ProcessContext::TourDataBo.checkButtonVisibility">
+        <Parameters>
+          <Input name="buttonId" type="Literal" value="CREATE_PRODUCT_CHECK_IN" />
+        </Parameters>
+        <Return name="ProcessContext::isVisible" />
+        <TransitionTo action="ShowTourDocumentsUI" />
+      </Action>
+      <Action actionType="VIEW" name="ShowTourDocumentsUI">
+        <UIDescription>Tour::TourDocumentsUI</UIDescription>
+        <Events>
+          <Event name="inventoryDocumentItemSelected" action="LoadInventoryBO" />
+          <!-- Menu item events -->
+          <Event name="createNewCheckinDocument" action="CreateNewWizard" />
+        </Events>
+      </Action>
+      <!-- LOAD -->
+      <Action name="LoadInventoryBO" actionType="PROCESS" process="InventoryDocument::LoadProcess">
+        <Parameters>
+          <Input name="InventoryDocumentId" value="Event.inventoryDocumentId" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::TriggerReload" value="TriggerReload" />
+        </ReturnValues>
+        <TransitionTo action="TriggerReloadDecision" />
+      </Action>
+      <Action name="TriggerReloadDecision" actionType="DECISION" parameter="ProcessContext::TriggerReload">
+        <Case value="1" action="loadTourDocumentsList" />
+        <CaseEmpty action="loadTourDocumentsList" />
+        <CaseElse action="ShowTourDocumentsUI" />
+      </Action>
+      <!-- Start - Create Checkin document -->
+      <Action name="CreateNewWizard" actionType="PROCESS" process="Order::CreateNewWizardProcess">
+        <Parameters>
+          <Input name="OrdererPKey" value="" type="Literal" />
+          <Input name="DocumentType" value="ProductCheckIn" type="Literal" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::CreateNewOrder_OrderTemplateId" value="orderMetaPKey" />
+        </ReturnValues>
+        <TransitionTo action="CreateNewWizardResultDecision" />
+      </Action>
+      <Action name="CreateNewWizardResultDecision" actionType="DECISION" parameter="ProcessContext::CreateNewOrder_OrderTemplateId">
+        <CaseEmpty action="ShowTourDocumentsUI" />
+        <CaseElse action="CreateNewCheckinDocument" />
+      </Action>
+      <Action name="CreateNewCheckinDocument" actionType="PROCESS" process="InventoryDocument::CreateNewProcess">
+        <Parameters>
+          <Input name="OrderTemplateId" value="ProcessContext::CreateNewOrder_OrderTemplateId" />
+        </Parameters>
+        <TransitionTo action="loadTourDocumentsList" />
+      </Action>
+      <!-- End - Create Checkin document -->
+    </Actions>
+  </Body>
+</Process>

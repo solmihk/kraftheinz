@@ -1,0 +1,55 @@
+<DataSource name="DsBoTourData" backendSystem="sf" businessObjectClass="BoTourData" external="false" editableEntity="Tour__c" schemaVersion="2.0">
+  <!-- For more information about the supported properties and nodes see corresponding DataSource.md file under ~Workspace/contractSnippets/YourModuel Section/DS/DS_DataSource -->
+  <Attributes>
+    <Attribute name="pKey" table="Tour__c" column="Id" />
+    <Attribute name="tourName" table="Tour__c" column="Name" />
+    <Attribute name="tourTemplateId" table="Tour__c" column="Tour_Template__c" />
+    <DateTimeAttribute dateName="startDate" timeName="startTime" table="Tour__c" column="Start_Date_Time__c" />
+    <Attribute name="tourStatus" table="Tour__c" column="Status__c" />
+    <DerivedAttribute name="statusIcon" value="CASE WHEN Tour__c.Status__c = 'Completed' THEN 'Status_Completed' WHEN Tour__c.Status__c = 'Running' THEN 'Status_Running' WHEN Tour__c.Status__c = 'Canceled' THEN 'Status_Canceled' ELSE 'Status_Open' END"/>
+    <Attribute name="startWarehouseId" table="Tour__c" column="Start_Warehouse__c" />
+    <Attribute name="endWarehouseId" table="Tour__c" column="End_Warehouse__c" />
+    <Attribute name="startWarehouseName" table="Warehouse__c" column="Name" />
+    <Attribute name="truckId" table="Tour__c" column="Truck__c" />
+    <Attribute name="trailer1Id" table="Tour__c" column="Trailer_1__c" />
+    <Attribute name="trailer2Id" table="Tour__c" column="Trailer_2__c" />
+    <Attribute name="odometerStart" table="Tour__c" column="Odometer_Start__c" />
+    <Attribute name="odometerEnd" table="Tour__c" column="Odometer_End__c" />
+    <Attribute name="vehicleOkStart" table="Tour__c" column="Truck_ok_Start__c" />
+    <Attribute name="vehicleStatusStart" table="Tour__c" column="Truck_Status_Start__c" />
+    <Attribute name="vehicleOkEnd" table="Tour__c" column="Truck_ok_End__c" />
+    <Attribute name="vehicleStatusEnd" table="Tour__c" column="Truck_Status_End__c" />
+    <Attribute name="tourDescription" table="Tour__c" column="Description__c" />
+    <DateTimeAttribute dateName="endDate" timeName="endTime" table="Tour__c" column="End_Date_Time__c" />
+    <DateTimeAttribute dateName="actualStartDate" timeName="actualStartTime" table="Tour__c" column="Start_Release_Time__c" />
+    <DateTimeAttribute dateName="actualEndDate" timeName="actualEndTime" table="Tour__c" column="Completion_Release_Time__c" />
+    <Attribute name="coDriverUserId" table="Tour__c" column="CoDriver__c" />
+    <Attribute name="vehicleDetailsReviewed" table="Tour__c" column="Vehicle_Details_Reviewed__c" />
+    <Attribute name="endTourVehicleDetailsReviewed" table="Tour__c" column="Has_End_Tour_Veh_Details_Rvw__c" />
+    <Attribute name="shouldAllowStartDayTimeTracking" table="Tour__c" column="Should_Allow_Start_Day_Time_Tracking__c"/>
+    <Attribute name="shouldAllowEndDayTimeTracking" table="Tour__c" column="Should_Allow_End_Day_Time_Tracking__c"/>
+    <Attribute name="considerMileage" table="Tour__c" column="Consider_Mileage__c" />
+    <Attribute name="considerVehicle" table="Tour__c" column="Consider_Vehicle__c" />
+    <Attribute name="considerVehicleStatus" table="Tour__c" column="Consider_Vehicle_Status__c" />
+    <Attribute name="startTourActivitiesCompleted" table="Tour__c" column="Start_Tour_Activities_Completed__c" />
+    <Attribute name="startWarehouseDescription" table="Warehouse__c" column="Description_#Language#__c" />
+    <DerivedAttribute name="defaultEtpVehicleTruckPKey" value="Tour__c.Truck__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour__c" alias="" idAttribute="Id" />
+    <Entity name="Warehouse__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Tour__c.Start_Warehouse__c" comparator="eq" rightSideType="Attribute" rightSideValue="Warehouse__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+    Tour__c.Id = #pKey#
+    ]]></QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="pKey" type="TEXT" />
+  </Parameters>
+</DataSource>

@@ -1,0 +1,246 @@
+<Process name="Tour::DriverCockpitProcess" defaultAction="ShowCockpit" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <!-- Helper -->
+        <Declaration name="CardController" type="BoHelperDriverCockpit" />
+        <!-- Card: User Welcome -->
+        <Declaration name="CardUserWelcome_DataLoaded" type="DomBool" />
+        <Declaration name="CardUserWelcome_RemainingTourCount" type="LuTourCountRemaining" />
+        <!-- Card: Summary -->
+        <!-- Card: Tour Schedule -->
+        <Declaration name="CardTourSchedule_InformationText" type="String" />
+        <Declaration name="CardTourSchedule_DataLoaded" type="DomBool" />
+        <Declaration name="CardTourSchedule_DisplayedSubcomponentName" type="String" />
+        <Declaration name="CardTourSchedule_TourCountEveryStatus" type="LuTourCountOverall" />
+        <Declaration name="CardTourSchedule_TourScheduleList" type="LoTourSchedule" />
+        <Declaration name="CardTourSchedule_ShowAllButtonLabel" type="String" />
+        <!-- Card: Notifications -->
+        <Declaration name="CardNotifications_InformationText" type="String" />
+        <Declaration name="CardNotifications_List" type="LoUsrNotification" />
+        <Declaration name="CardNotifications_ContextMenuList" type="LoUsrNotificationContextMenu" />
+        <Declaration name="CardNotifications_DataLoaded" type="DomBool" />
+        <Declaration name="NotificationDetail" type="BoUsrNotification" />
+        <!-- Card: Sync Status -->
+      </Declarations>
+    </ProcessContext>
+    <EntryActions>
+      <!-- Card Controller-->
+      <Action name="CreateCardController" actionType="CREATE" type="BoHelperDriverCockpit">
+        <Return name="ProcessContext::CardController" />
+      </Action>
+      <!-- Card: User Welcome -->
+      <Action actionType="LOGIC" name="SetCardDate" call="Utils.createAnsiDateToday">
+        <Return name="ProcessContext::CardDate" />
+      </Action>
+      <!-- Card: User Notifications -->
+      <Action name="CardNotifications_GetList" actionType="CREATE" type="LoUsrNotification">
+        <Return name="ProcessContext::CardNotifications_List" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <!-- View Action -->
+      <Action name="ShowCockpit" actionType="VIEW">
+        <UIDescription>Tour::DriverCockpitUI</UIDescription>
+        <Events>
+          <!-- Burger Menu Items -->
+          <Event name="BurgerMenu_showTourOverview" action="BurgerMenu_showTourOverview" />
+          <Event name="BurgerMenu_showCustomerOverview" action="BurgerMenu_showCustomerOverview" />
+          <Event name="BurgerMenu_showProductOverview" action="BurgerMenu_showProductOverview" />
+          <Event name="BurgerMenu_showNotificationsOverview" action="BurgerMenu_showNotificationsOverview" />
+          <Event name="BurgerMenu_showPersonalSettings" action="BurgerMenu_showPersonalSettings" />
+          <Event name="BurgerMenu_showAboutScreen" action="BurgerMenu_showAboutScreen" />
+          <Event name="BurgerMenu_logout" action="BurgerMenu_logout" />
+          <!-- Card: User Welcome-->
+          <Event name="CardUserWelcome_loadData" action="CardUserWelcome_loadRemainingTourCount" />
+          <!--Refresh Driver Cockpit -->
+          <Event name="RefreshDriverCockpit" action="RefreshDriverCockpit" />
+          <!-- Tour Schedule Card -->
+          <Event name="CardTourSchedule_loadData" action="CardTourSchedule_loadOverllTourCount" />
+          <Event name="itemSelected" action="TourDetail" />
+          <!-- All tours -->
+          <Event name="TourOverview_showAllTours" action="TourOverview_loadAllTours" />
+          <!-- Card: User Notifications-->
+          <Event name="CardNotifications_loadData" action="CardNotifications_LoadNotifications" />
+          <Event name="CardNotifications_itemSelected" action="CardNotifications_LoadNotification" />
+          <Event name="CardNotifications_contextMenuOpening" action="CardNotifications_GetContextMenu" />
+          <Event name="CardNotifications_contextMenuItemSelected" action="CardNotifications_ContextMenuResultDecision" />
+          <Event name="CardNotifications_showAllNotifications" action="CardNotifications_ShowNotifications" />
+        </Events>
+      </Action>
+      <!-- Burger Menu Start -->
+      <Action actionType="PROCESS" name="BurgerMenu_showTourOverview" process="Tour::TourOverviewProcess" />
+      <Action actionType="PROCESS" name="BurgerMenu_showCustomerOverview" process="Customer::ReviewCaptureProcess" />
+      <Action actionType="PROCESS" name="BurgerMenu_showProductOverview" process="Product::OverviewProcess" />
+      <Action actionType="PROCESS" name="BurgerMenu_showNotificationsOverview" process="User::NotificationProcess" />
+      <Action actionType="PROCESS" name="BurgerMenu_showPersonalSettings" process="User::UsrSettingsProcess" />
+      <Action actionType="PROCESS" name="BurgerMenu_showAboutScreen" process="Application::AboutProcess" />
+      <Action actionType="LOGIC" name="BurgerMenu_logout" call="ApplicationContext::User.logout" />
+      <!-- Burger Menu End -->
+      <!--Manually Refresh Driver Cockpit -->
+      <Action name="RefreshDriverCockpit" actionType="LOGIC" call="CardController.triggerReload">
+        <Parameters>
+          <Input name="areaName" value="mainArea" type="Literal" />
+        </Parameters>
+        <TransitionTo action="ShowCockpit" />
+      </Action>
+       <!-- Card: User Welcome  START-->
+      <Action name="CardUserWelcome_loadRemainingTourCount" actionType="LOAD" type="LuTourCountRemaining">
+        <Return name="ProcessContext::CardUserWelcome_RemainingTourCount" />
+        <TransitionTo action="CardUserWelcome_loadData"/>
+      </Action>
+      <Action name="CardUserWelcome_loadData" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::CardUserWelcome_DataLoaded" />
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+      </Action>
+      <!-- User Welcome End -->
+      <!-- Tour Schedule Start -->
+      <Action name="CardTourSchedule_loadOverllTourCount" actionType="LOAD" type="LuTourCountOverall">
+        <Return name="ProcessContext::CardTourSchedule_TourCountEveryStatus" />
+        <TransitionTo action="CardTourSchedule_loadData"/>
+      </Action>
+      <Action name="CardTourSchedule_loadData" actionType="LOAD" type="LoTourSchedule">
+        <Return name="ProcessContext::CardTourSchedule_TourScheduleList" />
+        <TransitionTo action="CardTourSchedule_DetermineInformationText"/>
+      </Action>
+      <Action name="CardTourSchedule_DetermineInformationText" actionType="LOGIC" call="ProcessContext::CardController.getCockpitListCounter">
+        <Parameters>
+          <Input name="lo" value="ProcessContext::CardTourSchedule_TourScheduleList" />
+          <Input name="overallCount" value="ProcessContext::CardTourSchedule_TourCountEveryStatus.tourCount" />
+        </Parameters>
+        <Return name="ProcessContext::CardTourSchedule_InformationText" />
+        <TransitionTo action="CardTourSchedule_GetShowAllToursButtonLabel"/>
+      </Action>
+      <Action name="CardTourSchedule_GetShowAllToursButtonLabel" actionType="LOGIC" call="ProcessContext::CardController.getButtonLabel">
+        <Parameters>
+          <Input name="cardName" type="Literal" value="CardTourSchedule" />
+        </Parameters>
+        <Return name="ProcessContext::CardTourSchedule_ShowAllButtonLabel" />
+        <TransitionTo action="CardTourSchedule_ReduceNumberOfListItems"/>
+      </Action>
+      <Action name="CardTourSchedule_ReduceNumberOfListItems" actionType="LOGIC" call="ProcessContext::CardController.reduceNumberOfListItems">
+        <Parameters>
+          <Input name="lo" value="ProcessContext::CardTourSchedule_TourScheduleList" />
+        </Parameters>
+        <Return name="ProcessContext::CardTourSchedule_TourScheduleList" />
+        <TransitionTo action="CardTourSchedule_DetermineDisplayedSubcomponentName"/>
+      </Action>
+      <Action name="CardTourSchedule_DetermineDisplayedSubcomponentName" actionType="LOGIC" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::CardTourSchedule_TourScheduleList" />
+          <Input name="type" type="Literal" value="TourSchedule" />
+        </Parameters>
+        <Return name="ProcessContext::CardTourSchedule_DisplayedSubcomponentName" />
+        <TransitionTo action="CardTourSchedule_setDataLoaded"/>
+      </Action>
+      <Action name="CardTourSchedule_setDataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <Return name="ProcessContext::CardTourSchedule_DataLoaded" />
+      </Action>
+      <Action name="TourDetail" actionType="PROCESS" process="Tour::TourCockpitProcess">
+        <Parameters>
+          <Input name="TourPKey" value="Event.pKey" />
+        </Parameters>
+      </Action>
+      <!-- Tour Schedule End -->
+      <!-- Notifications Start -->
+      <Action actionType="LOGIC" name="CardNotifications_LoadNotifications" call="ProcessContext::CardNotifications_List.getNotificationsForCard">
+        <Parameters>
+          <Input name="numberOfListItems" value="ProcessContext::CardController.numberOfListItems" />
+        </Parameters>
+        <Return name="ProcessContext::CardNotifications_List" />
+        <TransitionTo action="CardNotifications_GetCardInformation" />
+      </Action>
+      <Action actionType="LOGIC" name="CardNotifications_GetCardInformation" call="ProcessContext::CardNotifications_List.getInfoForNotificationsCard">
+        <Return name="ProcessContext::CardNotifications_InformationText" />
+        <TransitionTo action="CardNotifications_AssignDisplayedSubcomponentNameForNotifications" />
+      </Action>
+      <Action name="CardNotifications_AssignDisplayedSubcomponentNameForNotifications" actionType="LOGIC" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::CardNotifications_List" />
+          <Input name="type" value="Notifications" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardNotifications_DisplayedSubcomponentName" />
+        <TransitionTo action="CardNotifications_SetDataLoaded" />
+      </Action>
+      <Action name="CardNotifications_SetDataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardNotifications_DataLoaded" />
+      </Action>
+      <Action actionType="PROCESS" name="CardNotifications_LoadNotification" process="User::NotificationFlyoutProcess">
+        <Parameters>
+          <Input name="UsrNotificationPKey" value="Event.pKey" />
+        </Parameters>
+        <TransitionTo action="CardNotifications_LoadDecision" />
+        <ReturnValues>
+          <Return name="ProcessContext::ButtonPressed" value="buttonPressed" />
+        </ReturnValues>
+      </Action>
+      <Action name="CardNotifications_LoadDecision" actionType="DECISION" parameter="ProcessContext::ButtonPressed">
+        <Case value="markAsRead" action="CardNotifications_LoadNotifications" />
+        <CaseElse action="ShowCockpit" />
+      </Action>
+      <Action actionType="PROCESS" name="CardNotifications_ShowNotifications" process="User::NotificationProcess">
+        <TransitionTo action="CardNotifications_LoadNotifications" />
+      </Action>
+      <Action name="CardNotifications_GetContextMenu" actionType="LOAD" type="LoUsrNotificationContextMenu">
+        <Parameters>
+          <Input name="pKey" value="Event.pKey" />
+        </Parameters>
+        <Return name="ProcessContext::CardNotifications_ContextMenuList" />
+      </Action>
+      <Action name="CardNotifications_ContextMenuResultDecision" actionType="DECISION" parameter="Event.selected">
+        <Case value="MarkAsRead" action="CardNotifications_LoadNotificationBoAndMarkRead" />
+        <Case value="Delete" action="CardNotifications_ConfirmNotificationDeletion" />
+        <CaseElse action="ShowCockpit" />
+      </Action>
+      <Action name="CardNotifications_LoadNotificationBoAndMarkRead" actionType="LOAD" type="BoUsrNotification">
+        <Parameters>
+          <Input name="pKey" value="Event.pKey" />
+        </Parameters>
+        <Return name="ProcessContext::NotificationDetail" />
+        <TransitionTo action="CardNotifications_SetNotificationAsRead" />
+      </Action>
+      <Action name="CardNotifications_SetNotificationAsRead" actionType="LOGIC" call="ProcessContext::NotificationDetail.setNotificationAsRead">
+        <TransitionTo action="CardNotifications_SaveNotification" />
+      </Action>
+      <Action actionType="CONFIRM" confirmType="YesNo" name="CardNotifications_ConfirmNotificationDeletion">
+        <Message messageId="CasConfirmNotificationDeleteMsg" />
+        <Cases>
+          <Case value="Yes" action="CardNotifications_LoadNotificationBoAndDelete" />
+          <Case value="No" action="ShowCockpit" />
+        </Cases>
+      </Action>
+      <Action name="CardNotifications_LoadNotificationBoAndDelete" actionType="LOAD" type="BoUsrNotification">
+        <Parameters>
+          <Input name="pKey" value="Event.pKey" />
+        </Parameters>
+        <Return name="ProcessContext::NotificationDetail" />
+        <TransitionTo action="CardNotifications_DeleteNotification" />
+      </Action>
+      <Action actionType="LOGIC" name="CardNotifications_DeleteNotification" call="ProcessContext::NotificationDetail.delete">
+        <TransitionTo action="CardNotifications_SaveNotification" />
+      </Action>
+      <Action name="CardNotifications_SaveNotification" actionType="SAVE">
+        <Parameters>
+          <Input name="boUsrNotification" value="ProcessContext::NotificationDetail" />
+        </Parameters>
+        <TransitionTo action="CardNotifications_LoadNotifications" />
+      </Action>
+      <!-- Notifications End -->
+      <!-- Sync Status Start -->
+      <!-- Sync Status End -->
+      <!-- Load All Tours -->
+      <Action name="TourOverview_loadAllTours" actionType="PROCESS" process="Tour::TourOverviewProcess"> 
+      </Action>
+    </Actions>
+  </Body>
+</Process>

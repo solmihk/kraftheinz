@@ -1,0 +1,460 @@
+<UIDescription name="Tour::TourCockpitUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionPage">
+    <PageHeader>
+      <Bindings>
+        <Binding target="title" binding="ProcessContext::TourDataBo.tourDescription" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem directlyVisible="true" itemId="EndTourLink">
+          <Bindings>
+            <Resource target="Text" type="Label" id="EndTourLink" defaultLabel="End Tour" /> 
+            <Resource target="Icon" type="Image" id="Complete" defaultImage="Complete_PB" />
+            <Binding type="Editable" target="Editable" call="ProcessContext::TourDataBo.canEndTour" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="endTour"/>
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Bindings>
+        <Resource target="LogoIcon" type="Image" id="LogoSalesforce" />
+        <Resource target="AltLogoIcon" type="Image" id="LogoSalesforce" />
+      </Bindings>
+      <Area areaName="mainArea" areaPattern="Card">
+         <!-- Tour Welcome Card Start-->
+         <CardContainer name="CardTourWelcome">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourWelcome" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourWelcome" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="TourWelcomeCardTitle" defaultLabel="Summary" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourWelcome" bindingMode="TWO_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourWelcome_DataLoaded" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourWelcome_loadData" />
+          </Events>
+
+          <UserWelcome name="TourWelcomeCardUiPlugin">
+            <Bindings>
+              <Binding target="userImage" type="Blob" binding="ApplicationContext::User.profilePicture" />
+              <Binding target="userName" type="Text" binding="ApplicationContext::User.name" bindingMode="ONE_WAY" />
+              <Resource target="visitsLabel" type="Label" id="VisitsId" defaultLabel="Visits" />
+              <Binding target="visitCount" type="Text" binding="ProcessContext::CardTourWelcome_TourVisitsCount.tourVisitsCount" bindingMode="ONE_WAY" />
+              <Resource target="documentLabel" type="Label" id="DocumentId" defaultLabel="Delivery Documents" />
+              <Binding target="documentCount" type="Text" binding="ProcessContext::CardTourWelcome_TourDocumentsCount.tourDocumentsCount" bindingMode="ONE_WAY" />
+              <Resource target="userMessage" type="Label" id="CardTourWelcome_MessageText" defaultLabel="Have a great day." />
+              <Binding target="isTourUser" type="Bool" binding="ProcessContext::CardController.isTourUser" />
+              <Resource id="NoUser" target="userDefaultImage" type="Image" />
+              <Binding target="selectedDate" type="Text" binding="ProcessContext::CardDate" bindingMode="ONE_WAY" />
+              <Resource target="previousDayIcon" type="Image" id="ChevronLeft" defaultImage="ChevronLeft" />
+              <Resource target="nextDayIcon" type="Image" id="ChevronRight" defaultImage="ChevronRight" />
+              <Resource target="previousDayOnTouchIcon" type="Image" id="ChevronLeftPressed" defaultImage="ChevronLeftPressed" />
+              <Resource target="nextDayOnTouchIcon" type="Image" id="ChevronRightPressed" defaultImage="ChevronRightPressed" />
+              <Resource target="todayIcon" type="Image" id="TodayIcon" defaultImage="TodayIcon" />
+              <Resource target="todayLabel" type="Label" id="TodayLabel" defaultLabel="Today" />
+            </Bindings>
+          </UserWelcome>
+        </CardContainer>
+         <!-- Tour Welcome Card End -->
+         <!-- Card : Tour Summary Card Start -->
+        <CardContainer name="CardTourSummary">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourSummary" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourSummary" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="TourSummaryCardTitle" defaultLabel="Tour Details" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourSummary_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourSummary" bindingMode="TWO_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="true" />
+          <Events>
+            <LoadContainerData event="CardTourSummary_loadData" />
+          </Events>
+          <CockpitSections name="TourSummarySections">
+            <CockpitSection name="TourSummarySection" sectionPattern="3columns" showSeparator="true">
+              <Bindings>
+                <Binding target="col1row1" type="Blob" roundedEdge="true" defaultImage="TourWarehouse" verticalAlignment="Top" defaultImageType=".svg" />
+                <Binding target="col2row1" type="ItemIdentifier" binding="ProcessContext::TourDataBo.startWarehouseDescription" />
+                <Binding target="col2row2" type="ItemSecondary" binding="ProcessContext::TourStartDate" />
+                <Binding target="col2row3" type="ItemSecondary" binding="ProcessContext::TourDataBo.tourStatus" />
+                <Binding target="col3row1" type="Image" imageType=".svg" binding="ProcessContext::TourDataBo.statusIcon" verticalAlignment="Center" />
+              </Bindings>
+            </CockpitSection>
+          </CockpitSections>
+          <LinkBar>
+            <ImageButton name="StartTourLink">
+              <Bindings>
+                <Resource target="Text" type="Label" id="StartTourLink" defaultLabel="Start Tour" bindingMode="ONE_WAY" />
+                <Resource target="Image" type="Image" id="TourStart" defaultImage="TourStart" />
+                <Binding type="Editable" target="Editable" call="ProcessContext::TourDataBo.canStartTour" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="CardTourSummary_startTour" />
+              </Events>
+            </ImageButton>
+            <ImageButton name="TourDetailsLink">
+              <Bindings>
+                <Resource target="Text" type="Label" id="TourDetailsLink" defaultLabel="View Tour" bindingMode="ONE_WAY" />
+                <Resource target="Image" type="Image" id="TourDetails" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="CardTourSummary_openTourDetails" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Card : Tour Summary Card End -->
+        <!-- Tour Start Card -->
+         <CardContainer name="StartOfTour">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourStart" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourStart" />
+              </Parameters>
+            </Binding>
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourStart" bindingMode="TWO_WAY" />
+            <Resource target="Title" type="Label" id="CardTourStartTitle" defaultLabel="Start Tour Activities" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourStart_DataLoaded" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourStart_loadData" />
+          </Events>
+        
+          <CockpitList name="CardTourStart" hasBorder="false" dataSource="ProcessContext::CardTourStart_TourStartList.Items[]">
+            <Items name="Items" itemPattern="CardTourStartItems">
+              <ItemListLayout>
+                <Default>
+                  <Col width="1.5em" height="1.5em" layoutType="Status" bindingId="StatusIcon" />
+                  <Col>
+                    <Row layoutType="itemIdentifierCockpit" bindingId="ActivityName" />
+                  </Col>
+                </Default>
+              </ItemListLayout>
+              <Bindings>
+                <Binding target="ActivityName" type="Text" binding=".activityName" bindingMode="ONE_WAY" />
+                <Binding target="StatusIcon" type="Image" binding=".status" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+            <Events>
+              <ItemSelectedEvent event="CardTourStart_itemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                  <Param name="activityId" value=".activityId" />
+                </Params>
+              </ItemSelectedEvent>
+            </Events>
+          </CockpitList>
+          <LinkBar>
+            <ImageButton name="ActivitiesCompletedButton">
+              <Bindings>
+                <Binding target="Text" type="Text" binding="ProcessContext::CardTourStart_activitiesButtonInfo.label" bindingMode="ONE_WAY"/>
+                <Binding target="Image" type="Image" imageType=".svg" binding="ProcessContext::CardTourStart_activitiesButtonInfo.status" bindingMode="ONE_WAY" />
+                <Binding type="Editable" target="Editable" binding="ProcessContext::CardTourStart_activitiesButtonInfo.isEditable" bindingMode="ONE_WAY" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="CardTourStart_activitiesCompleted" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Tour Start Card End -->
+        <!-- Card : Tour Visits Start -->
+        <CardContainer name="CardTourVisits">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourVisits" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourVisits" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="CardTourVisitsTitle" defaultLabel="Your Visits" />
+            <Binding target="Information" type="Text" binding="ProcessContext::CardTourVisits_InformationText" bindingMode="ONE_WAY" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourVisits" bindingMode="TWO_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourVisits_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="DisplayedSubcomponentName" type="Text" binding="ProcessContext::CardTourVisits_DisplayedSubcomponentName" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourVisits_loadData" />
+          </Events>
+          <NoDataMessage name="CardNoDataMessageUiPlugin">
+            <Bindings>
+              <Resource target="maintext" type="Label" id="CardTourVisits_NoDataMessageMainText" defaultLabel="Looks free and clear!" />
+              <Resource target="subtext" type="Label" id="CardTourVisits_NoDataMessageSubText" defaultLabel="You don't have any visits scheduled." />
+              <Resource id="EmptyList" target="infoIcon" type="Image" />
+            </Bindings>
+          </NoDataMessage>
+          <CockpitList name="TourVisits" hasBorder="false" dataSource="ProcessContext::CardTourVisits_TourVisitsList.Items[]">
+            <Items name="Items" itemPattern="CardTourVisitsItems">
+              <ItemListLayout>
+                <Default>
+                  <Col width="1.5em" height="1.6em" layoutType="Image" bindingId="visitTypeImage" />
+                  <Col width="3.3em">
+                    <Row layoutType="itemIdentifier" bindingId="visitStatus" />
+                    <Row layoutType="itemSecondary" bindingId="startTime" />
+                  </Col>
+                  <Col flex="1">
+                    <Row layoutType="itemIdentifier" bindingId="customerName" />
+                    <Row layoutType="itemSecondary" bindingId="customerAddress" />
+                    <Row>
+                      <Col  width="1em" height="1em" layoutType="Image" bindingId="documentCountImage" />
+                      <Col layoutType="itemSecondary" bindingId="documentCount" />
+                    </Row>
+                  </Col>
+                </Default>
+              </ItemListLayout>
+              <ContextMenu>
+                <Bindings>
+                  <Binding target="DataSource" binding="ProcessContext::CardTourVisits_ContextMenuList.Items[]" bindingMode="ONE_WAY" />
+                </Bindings>
+                <Items name="ContextMenuItems">
+                  <Bindings>
+                    <Binding target="Icon" type="Image" binding=".actionImg" />
+                    <Binding target="Text" type="Label" binding=".actionId" />
+                    <Binding type="Editable" target="Editable" binding=".actionEnabled" />
+                  </Bindings>
+                </Items>
+              </ContextMenu>
+              <Bindings>
+                <Binding target="customerName" type="Text" binding=".customerName" bindingMode="ONE_WAY" />
+                <Binding target="customerAddress" type="Text" binding=".customerAddress" bindingMode="ONE_WAY" />
+                <Resource target="documentCountImage" type="Image" id="Note_LM" />
+                <Binding target="documentCount" type="Text" binding=".documentCount" bindingMode="ONE_WAY" />
+                <Binding target="startTime" type="Text" binding=".startTime" bindingMode="ONE_WAY" />
+                <Binding target="visitTypeImage" type="Image" binding=".visitTypeImage" bindingMode="ONE_WAY" />
+                <Binding target="visitStatus" type="Text" binding=".status.text" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+            <Events>
+              <ItemSelectedEvent event="CardTourVisits_itemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                  <Param name="visitStatus" value=".status" />
+                  <Param name="customerId" value=".customerId" />
+                </Params>
+              </ItemSelectedEvent>
+              <ContextOpeningEvent event="CardTourVisits_contextMenuOpening">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                  <Param name="visitStatus" value=".status" />
+                  <Param name="customerId" value=".customerId" />
+                </Params>
+              </ContextOpeningEvent>
+              <ContextSelectedEvent event="CardTourVisits_contextMenuItemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                  <Param name="customerId" value=".customerId" />
+                </Params>
+              </ContextSelectedEvent> 
+            </Events>
+          </CockpitList>
+          <LinkBar>
+            <ImageButton name="ViewVisitsLinkInTourCockpit">
+              <Bindings>
+                <Resource target="Text" type="Label" id="ViewVisitsLinkInTourCockpit" defaultLabel="View Visits" bindingMode="ONE_WAY" />
+                <Resource target="Image" type="Image" id="Tour_Visit_List" defaultImage="Tour_Visit_List" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="showVisitsMap" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Card : Tour Visits End -->
+        <!-- Tour End Activities Card -->
+        <CardContainer name="EndOfTour">
+          <Bindings>
+            <Binding type="Visible" target="Visible" binding="ProcessContext::CardTourEnd_IsCardVisible" bindingMode="ONE_WAY" />
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourEnd" />
+              </Parameters>
+            </Binding>
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourEnd" bindingMode="TWO_WAY" />
+            <Resource target="Title" type="Label" id="CardTourEndTitle" defaultLabel="End Tour Activities" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourEnd_DataLoaded" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourEnd_loadData" />
+          </Events>
+          <CockpitList name="CardTourEnd" hasBorder="false" dataSource="ProcessContext::CardTourEnd_TourEndList.Items[]">
+            <Items name="Items" itemPattern="CardTourEndItems">
+              <ItemListLayout>
+                <Default>
+                  <Col width="1.5em" height="1.5em" layoutType="Status" bindingId="StatusIcon" />
+                  <Col>
+                    <Row layoutType="itemIdentifierCockpit" bindingId="ActivityName" />
+                  </Col>
+                </Default>
+              </ItemListLayout>
+              <Bindings>
+                <Binding target="ActivityName" type="Text" binding=".activityName" bindingMode="ONE_WAY" />
+                <Binding target="StatusIcon" type="Image" binding=".status" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+            <Events>
+              <ItemSelectedEvent event="CardTourEnd_itemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                  <Param name="activityId" value=".activityId" />
+                </Params>
+              </ItemSelectedEvent>
+            </Events>
+          </CockpitList>
+        </CardContainer>
+        <!-- Tour End Activities Card End -->
+        <!-- Card : Tour Message Card Start -->
+        <CardContainer name="cardTourMessage">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourMessage" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourMessage" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="CardTourMessageTitle" defaultLabel="Tour Message" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourMessage" bindingMode="TWO_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourMessage_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="DisplayedSubcomponentName" type="Text" binding="ProcessContext::CardTourMessage_DisplayedSubcomponentName" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourMessage_loadData" />
+          </Events>
+          <NoDataMessage name="CardNoDataMessageUiPlugin">
+            <Bindings>
+              <Resource target="maintext" type="Label" id="CardTourMessage_NoDataMessageSubText" defaultLabel="No message available for this tour!" />
+              <Resource id="EmptyList" target="infoIcon" type="Image" />
+            </Bindings>
+          </NoDataMessage>
+          <CockpitList name="TourMessage" hasBorder="false" dataSource="ProcessContext::CardTourMessage_TourMessageList.Items[]">
+            <Items name="Items" itemPattern="CardTourMessageItems">
+              <ItemListLayout>
+                <Default>
+                  <Col flex="1">
+                  <Row layoutType="itemIdentifierCockpit" bindingId="message" />
+                  </Col>
+                </Default>
+              </ItemListLayout>
+              <Bindings>
+                <Binding target="message" type="Text" binding=".message" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+          </CockpitList>
+        </CardContainer>
+        <!-- Card : Tour Message Card End -->
+        <!-- Tour Visits Guide START -->
+        <CardContainer name="CardTourVisitsGuidance">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourVisitsGuidance" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourVisitsGuidance" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="ShowMaximizeButton" call="ProcessContext::CardController.isCardMaximizable" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourVisitsGuidance" />
+              </Parameters>
+            </Binding>
+            <!-- Using the data loaded by visit card hence using CardVisits_DataLoaded binding-->
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardMap_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourVisitsGuidance" bindingMode="TWO_WAY" />
+            <Resource target="Title" type="Label" id="CardTourVisitsGuidanceTitle" defaultLabel="Next Visit Guidance" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourVisitsGuidance_loadData" />
+            <ButtonPressedEvent event="CardTourVisitsGuidance_ShowMaximizedMap" />
+          </Events>
+          <ActionBar>
+            <ImageButton name="NavigateTo">
+              <Bindings>
+                <Resource target="Text" type="Label" id="NavigateToId" defaultLabel="Navigate To Map" />
+                <Resource target="Image" type="Image" id="Navigate" defaultImage="Navigate" />
+                <Binding type="Visible" target="Visible" call="ProcessContext::CardTourVisitsGuidance_TourVisitsList.navigateToButtonVisibility" bindingMode="ONE_WAY" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="CardVisitGuide_ShowGuideVisitMap" />
+              </Events>
+            </ImageButton>
+          </ActionBar>
+          <CockpitMap height="450px" dataSource="ProcessContext::CardMap_VisitList.Items[]" name="VisitsGuide" pKeyField="bpaMainPKey" latitudeField="latitude" longitudeField="longitude" idField="mapPinId" toolTipField="toolTipText">
+            <Bindings>
+              <Resource target="MarkerImage" type="Image" id="MarkerStore" defaultImage="MarkerStore" />
+              <Resource target="CurrentPositionImage" type="Image" id="MarkerUser" defaultImage="MarkerUser" />
+            </Bindings>
+            <Events>
+              <MarkerInfoClickedEvent event="Customer_MarkerClicked">
+                <Params>
+                  <Param name="CustomerPKey" value=".pkey" />
+                </Params>
+              </MarkerInfoClickedEvent>
+            </Events>
+          </CockpitMap>
+          <LinkBar>
+            <ImageButton name="ViewVisitsLinkInTourCockpit">
+              <Bindings>
+                <Resource target="Text" type="Label" id="ViewVisitsLinkInTourCockpit" defaultLabel="View Visits" bindingMode="ONE_WAY" />
+                <Resource target="Image" type="Image" id="Trip_HB" defaultImage="Trip_HB" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="showVisitsMap" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Tour Visits Guide End -->
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

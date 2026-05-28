@@ -1,0 +1,14 @@
+<ListObject name="LoInventoryTransaction" generateLoadMethod="true" lightWeight="only">
+  <DataSource name="DsLoInventoryTransaction"/>
+  <Item objectClass="LiInventoryTransaction"/>
+  <Methods>
+    <Method name="createTransactionForOrderItem"/>
+    <Method name="createTransactionForOrderPayment"/>
+    <Method name="saveAsync"/>
+    <Method name="createTransactionForTruckLoadItem"/>
+    <Method name="createTransactionForCashPayment"/>
+    <Method name="fetchUom"/>
+    <Method name="fetchOrderId"/>
+    <Method name="fetchDescription1"/>
+  </Methods>
+</ListObject>

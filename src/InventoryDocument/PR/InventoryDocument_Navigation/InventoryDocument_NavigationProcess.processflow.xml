@@ -1,0 +1,71 @@
+<Process name="InventoryDocument::NavigationProcess" defaultAction="StartNavigation" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="CurrentTabPage" type="String" />
+      </Declarations>
+      <Parameters>
+        <Input name="BoInventoryDocument" type="BoInventoryDocument" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="NAVIGATION" name="StartNavigation">
+        <Parameters name="ProcessContext::NavigationName">
+          <Processes defaultProcess="ItemList">
+            <Process id="ItemList" image="ShoppingCartItem" label="orderItems" defaultLabel="Items" process="InventoryDocument::ItemTabProcess" action="setCurrentTabName_itemList" />
+            <Process id="Summary" image="Info" label="InventoryDocumentNavigationSummary" defaultLabel="Summary" process="InventoryDocument::HeaderTabProcess" action="setCurrentTabName_header" />
+          </Processes>
+        </Parameters>
+      </Action>
+      <!-- Header Start -->
+      <Action actionType="LOGIC" name="setCurrentTabName_header" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="tab_Header" />
+        </Parameters>
+        <Return name="ProcessContext::currentTabPage" />
+        <TransitionTo action="StartHeaderProcess" />
+      </Action>
+      <Action actionType="PROCESS" name="StartHeaderProcess" process="InventoryDocument::HeaderTabProcess">
+        <Parameters>
+          <Input name="BoInventoryDocument" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+      </Action>
+      <!-- Header End -->
+      <!-- Item list start -->
+      <Action actionType="LOGIC" name="setCurrentTabName_itemList" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="tab_ItemList" />
+        </Parameters>
+        <Return name="ProcessContext::currentTabPage" />
+        <TransitionTo action="StartItemListProcess" />
+      </Action>
+      <Action actionType="PROCESS" name="StartItemListProcess" process="InventoryDocument::ItemTabProcess">
+        <Parameters>
+          <Input name="BoInventoryDocument" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+      </Action>
+      <!-- Item list end -->
+      <Action actionType="LOGIC" name="resetValidateForReleaseFlag" call="ProcessContext::BoInventoryDocument.setValidateForRelease">
+        <Parameters>
+          <Input name="value" type="Literal" value="0" />
+        </Parameters>
+        <TransitionTo action="AfterValidationErrorUIRedirect_Decision" />
+      </Action>
+      <!-- Redirect decision for validation errors to stay on the page where the user was before the validation -->
+      <Action name="AfterValidationErrorUIRedirect_Decision" actionType="DECISION" parameter="ProcessContext::currentTabPage">
+        <Case value="tab_Header" action="StartHeaderProcess" />
+        <Case value="tab_ItemList" action="StartItemListProcess" />
+        <CaseElse action="StartNavigation" />
+      </Action>
+    </Actions>
+  </Body>
+  <ExitHandlers>
+    <ExitHandler handlerName="beforeExit1" type="Validate" name="ProcessContext::BoInventoryDocument">
+      <OnValidationError transitionTo="resetValidateForReleaseFlag" />
+    </ExitHandler>
+  </ExitHandlers>
+</Process>

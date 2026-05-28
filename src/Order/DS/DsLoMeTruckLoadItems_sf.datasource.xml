@@ -1,0 +1,85 @@
+<Datasource name="DsLoMeTruckLoadItems" backendSystem="sf" businessObjectClass="LoMeTruckLoadItems" external="true" editableEntity="Inventory__c" schemaVersion="2.0">
+  <Database platform="SQLite">
+    <Load><![CDATA[
+
+      // ##################################################################################################################
+      // ### This Datasource is used to load the current inventory to set currentInventory flag in temp table           ###
+      // ### Current inventory is defined via main item template + Inventory Transaction flaggd as "Used For Display"   ###
+      // ### Mainly implemented for DSD FLow but not limited to DSD                                                     ###
+      // ### Can also be enabled for REX via "Consider Inventory" flag in the order template                            ###
+      // ##################################################################################################################
+
+      // ######################
+      // ### Param Handling ###
+      // ######################
+      var inventoryTemplateId = " ";		
+      if (Utils.isDefined(jsonQuery.inventoryTemplateId)) {
+        inventoryTemplateId = Utils.convertForDBParam(jsonQuery.inventoryTemplateId, "DomPKey");
+      }
+
+      var userId = " ";		
+      if (Utils.isDefined(jsonQuery.userId)) {
+        userId = Utils.convertForDBParam(jsonQuery.userId, "DomPKey");
+      }
+
+      var accountId = " ";		
+      if (Utils.isDefined(jsonQuery.accountId)) {
+        accountId = Utils.convertForDBParam(jsonQuery.accountId, "DomPKey");
+      }
+
+      var tourId = " ";		
+      if (Utils.isDefined(jsonQuery.tourId)) {
+        tourId = Utils.convertForDBParam(jsonQuery.tourId, "DomPKey");
+      }
+
+      var vehicleId = " ";		
+      if (Utils.isDefined(jsonQuery.vehicleId)) {
+        vehicleId = Utils.convertForDBParam(jsonQuery.vehicleId, "DomPKey");
+      }
+      var sqlParams = {inventoryTemplateId, userId, accountId, tourId, vehicleId};
+
+      
+      // ######################
+      // ###   Statement    ###
+      // ######################   
+      var sqlStmt = "SELECT ";
+      sqlStmt +=      "Inventory__c.Product__c as prdId, ";
+      sqlStmt +=      "'1' as isAvailableInventory, ";
+      sqlStmt +=      "SUM(CASE WHEN Inventory_Transaction__c.Amount__c IS NULL THEN 0.0 ELSE Inventory_Transaction__c.Amount__c END) AS balance ";
+      sqlStmt +=    "FROM ";
+      sqlStmt +=       "Inventory__c, "; 
+      sqlStmt +=       "Inventory_Transaction__c, ";  
+      sqlStmt +=       "Inventory_Transaction_Template__c ";  
+      sqlStmt +=    "WHERE ";
+      sqlStmt +=      "Inventory__c.Id = Inventory_Transaction__c.Inventory__c ";
+      sqlStmt +=      "AND Inventory_Transaction__c.Inventory_Transaction_Template__c = Inventory_Transaction_Template__c.Id ";
+      sqlStmt +=      "AND Inventory__c.Phase__c = 'Active' ";
+      sqlStmt +=      "AND Inventory__c.SALES_ORG__C = '#SALESORG#' ";
+      sqlStmt +=      "AND Inventory__c.Inventory_Template__c = '#inventoryTemplateId#' ";
+      sqlStmt +=      "AND Inventory__c.User__c = '#userId#' ";
+      sqlStmt +=      "AND Inventory__c.Account__c = '#accountId#' ";
+      sqlStmt +=      "AND Inventory__c.Tour__c = '#tourId#' ";
+      sqlStmt +=      "AND Inventory__c.Vehicle__c = '#vehicleId#' ";
+      sqlStmt +=      "AND Inventory__c.Invalid__c = '0' ";
+      sqlStmt +=      "AND #compareAsDate('Inventory__c.Valid_From__c', 'Date','<=', #TodayAsDate#, 'Date')# ";
+			sqlStmt +=      "AND #compareAsDate('Inventory__c.Valid_Thru__c', 'Date','>=', #TodayAsDate#, 'Date')# "
+      sqlStmt +=      "AND Inventory_Transaction__c.Accounted__c = '0' ";
+      sqlStmt +=      "AND (Inventory_Transaction_Template__c.Transaction_Control__c <> 'Neutral' OR Inventory_Transaction_Template__c.Transaction_Type__c = 'Balance') ";
+      sqlStmt +=      "AND Inventory__c.IsDeleted <> '1' ";
+      sqlStmt +=      "AND Inventory_Transaction__c.IsDeleted <> '1' ";
+      sqlStmt +=      "AND Inventory_Transaction_Template__c.IsDeleted <> '1' ";
+      sqlStmt +=    "GROUP BY ";
+      sqlStmt +=      "Inventory__c.Id ";
+      sqlStmt +=    "HAVING ";
+      sqlStmt +=      "balance > 0.0 ";
+      sqlStmt +=    "ORDER BY ";
+      sqlStmt +=      "Inventory__c.Product__c ASC ";
+
+      return Utils.replaceMacrosParam(sqlStmt, sqlParams);
+      ]]>    
+    </Load>
+    <Update><![CDATA[ return undefined;]]></Update>
+    <Insert><![CDATA[return undefined;]]> </Insert>
+    <Delete><![CDATA[return undefined;]]> </Delete>
+  </Database>
+</Datasource>

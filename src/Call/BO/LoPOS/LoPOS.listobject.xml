@@ -1,0 +1,8 @@
+<ListObject name="LoPOS" generateLoadMethod="true">
+  <DataSource name="DsLoPOS"/>
+  <Item objectClass="LiPOS"/>
+  <Methods>
+    <Method name="resetCounter"/>
+    <Method name="resetCurrent"/>
+  </Methods>
+</ListObject>

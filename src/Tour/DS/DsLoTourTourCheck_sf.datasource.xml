@@ -1,0 +1,37 @@
+<DataSource name="DsLoTourTourCheck" backendSystem="sf" businessObjectClass="LoTourTourCheck" external="false" editableEntity="Tour_Tour_Check__c" schemaVersion="2.0">
+  <!-- For more information about the supported properties and nodes see corresponding DataSource.md file under ~Workspace/contractSnippets/YourModuel Section/DS/DS_DataSource -->
+  <Attributes>
+    <Attribute name="pKey" table="Tour_Tour_Check__c" column="Id" />
+    <Attribute name="tourId" table="Tour_Tour_Check__c" column="Tour__c" />
+    <Attribute name="description" table="Tour_Check__c" column="Description_#Language#__c" />
+    <Attribute name="checkType" table="Tour_Tour_Check__c" column="Check_Type__c" />
+    <Attribute name="sort" table="Tour_Tour_Check__c" column="Sort__c" />
+    <Attribute name="usage" table="Tour_Tour_Check__c" column="Usage__c" />
+    <Attribute name="answer" table="Tour_Tour_Check__c" column="Answer__c" />
+    <DerivedAttribute name="groupUsage" value="''" />
+    <DerivedAttribute name="dataType" value="'Toggle'"/>
+    <DerivedAttribute name="toggleId" value="'Bool'"/>
+  </Attributes>
+  <Entities>
+    <Entity name="Tour_Tour_Check__c" alias="" idAttribute="Id" />
+    <Entity name="Tour_Check__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Tour_Tour_Check__c.Tour_Check__c" comparator="eq" rightSideType="Attribute" rightSideValue="Tour_Check__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+    Tour_Tour_Check__c.Tour__c='#tourId#' AND
+    Tour_Tour_Check__c.Check_Type__c='#checkType#'
+  ]]>
+  </QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="Tour_Tour_Check__c" attribute="Sort__c" direction="ASC" />
+  </OrderCriteria>
+  <Parameters>
+    <Parameter name="tourId" type="TEXT" />
+    <Parameter name="checkType" type="TEXT" />
+  </Parameters>
+</DataSource>

@@ -1,0 +1,122 @@
+<UIDescription name="InventoryDocument::HeaderTabUI" schemaVersion="0.0.0.5" >
+  <Page pagePattern="SingleSectionPage" >
+    <PageHeader>
+      <Bindings>
+        <Binding target="title" type="Text" binding="ProcessContext::BoInventoryDocument.description" bindingMode="ONE_WAY" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem directlyVisible="true" itemId="releaseOrder">
+          <Bindings>
+            <Resource target="Text" type="Label" id="releaseOrder" defaultLabel="Release" />
+            <Resource target="Icon" type="Image" id="Complete" defaultImage="Complete.png" />
+            <Binding type="Editable" target="Editable" call="ProcessContext::BoInventoryDocument.releaseButtonActive" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.releaseButtonVisible" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="releaseOrder" />
+          </Events>
+        </MenuItem>
+        <MenuItem directlyVisible="true" itemId="reviewReleaseInformation">
+          <Bindings>
+            <Resource target="Text" type="Label" id="reviewRelease" defaultLabel="Release Info" />
+            <Resource target="Icon" type="Image" id="CompleteDarkGrey24" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isReleaseInformationVisible" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isReleaseButtonVisible"/>
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="reviewReleaseInformation" />
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+ <Section sectionName="masterSection" sectionPattern="GroupedElementsArea">
+      <Area areaName="Main" areaPattern="GroupedElementsArea">
+        <GroupElement name="IdentificationGroup">
+          <Bindings>
+            <Resource target="Title" type="Label" id="CheckoutDetails" defaultLabel="Check-out Document Details" />
+          </Bindings>
+          <InputArea name="checkoutDocumentType" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Check-out Document" id="checkoutDocmentType" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.documentType.text" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+          <DatePickerField name="orderDate" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Created Date" id="Date" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.orderDate" bindingMode="ONE_WAY" />
+            </Bindings>
+          </DatePickerField>
+        </GroupElement>
+        <EmbeddedList name="loItemsUnitOfMeasureList" dataSource="ProcessContext::DocumentUoMList.Items[]">
+            <Bindings>
+              <Resource target="Title" type="Label" id="AggregatedQuantitySummaryId" defaultLabel="Aggregated quantity Summary" />
+            </Bindings>
+          <Items name="Items" itemPattern="AggregatedQuantitySummaryItems">
+            <Bindings>
+              <Binding target="UnitOfMeasurement" type="Text" binding=".uom" bindingMode="ONE_WAY" />
+              <Binding target="ExpectedUnits" type="Decimal" formatV2="10.0" binding=".expectedUnits" bindingMode="ONE_WAY" />
+              <Binding target="ActualUnits" type="Decimal" formatV2="10.0" binding=".actualUnits" bindingMode="ONE_WAY" />
+              <Binding target="DifferenceUnits" type="Decimal" formatV2="10.0" binding=".differenceUnits" bindingMode="ONE_WAY" />
+              <!-- Header Labels -->
+              <Resource target="TotalLabel" type="Label" id="totalLabel" defaultLabel="Total" />
+              <Resource target="ExpectedLabel" type="Label" id="expectedLabel" defaultLabel="Expected" />
+              <Resource target="ActualLabel" type="Label" id="actualLabel" defaultLabel="Actual" />
+              <Resource target="DifferenceLabel" type="Label" id="differenceLabel" defaultLabel="Difference" />
+            </Bindings>
+            <ItemListLayout>
+              <Default>
+                <Header>
+                  <Col bindingId="TotalLabel" align="left" />
+                  <Col bindingId="ExpectedLabel" align="left" />
+                  <Col bindingId="ActualLabel" align="left" />
+                  <Col bindingId="DifferenceLabel" align="left" />
+                </Header>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="UnitOfMeasurement" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="ExpectedUnits" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="ActualUnits" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="DifferenceUnits" />
+                </Col>
+              </Default>
+            </ItemListLayout>
+          </Items>
+        </EmbeddedList>
+        <GroupElement name="ValueSummaryGroup">
+          <Bindings>
+            <Resource target="Title" type="Label" id="ValueSummaryDetails" defaultLabel="Amount Details" />
+          </Bindings>
+          <InputArea name="actualValue" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Amount" id="amount" />
+              <Binding target="Value" type="Decimal" formatV2="10.2" binding="ProcessContext::BoInventoryDocument.totalValue" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+          <InputArea name="currency" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Currency" id="currencyLabel" />
+              <Binding target="Value"  binding="ApplicationContext::User.currency" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+        </GroupElement>
+      <GroupElement name="WarehouseGroup">
+        <Bindings>
+          <Resource target="Title" type="Label" id="WarehouseId" defaultLabel="Warehouse" />
+        </Bindings>
+        <Lookup name="wareHouse" disabled="true">
+          <Bindings>
+            <Resource target="Label" type="Label" id="WarehouseLabelId" defaultLabel="Warehouse" />
+            <Binding target="Value" binding="ProcessContext::BoInventoryDocument.luTourStartWarehouse.description" bindingMode="ONE_WAY" />
+          </Bindings>
+        </Lookup>
+      </GroupElement>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

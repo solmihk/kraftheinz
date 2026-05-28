@@ -1,0 +1,15 @@
+<DataSource name="DsLuTourCountOverall" backendSystem="sf" businessObjectClass="LuTourCountOverall" external="false" editableEntity="Tour__c" schemaVersion="2.0">
+  <Attributes>
+    <DerivedAttribute name="tourCount" value="Count(*)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Tour__c.Default_Driver__c= '#UserPKey#'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters />
+</DataSource>

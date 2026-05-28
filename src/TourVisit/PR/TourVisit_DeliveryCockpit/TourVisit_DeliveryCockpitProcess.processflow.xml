@@ -1,0 +1,624 @@
+<Process name="TourVisit::DeliveryCockpitProcess" defaultAction="ShowDeliveryCockpitUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <!-- Helper -->
+        <Declaration name="CardController" type="BoHelperTourVisitCockpit" />
+        <Declaration name="StoreCockpitCardController" type="BoStoreCockpitHelper" />
+        <!-- Card: Visit Summary -->
+        <Declaration name="CardVisitSummary_DataLoaded" type="DomBool" />
+        <!-- Card: Contact Details -->
+        <Declaration name="CardContactDetails_DataLoaded" type="DomBool" />
+        <Declaration name="CustomerContactInfo" type="Object" />
+        <Declaration name="CustomerDetail" type="BoCustomer" />
+        <Declaration name="isListingModified" type="DomBool" />
+        <!-- Card: Order History-->
+        <Declaration name="CardOrderHistory_InformationText" type="String" />
+        <Declaration name="CardOrderHistory_OrderList" type="LoOrderOverview" />
+        <Declaration name="CardOrderHistory_ContextMenuList" type="LoOrderOverviewContextMenu" />
+        <Declaration name="CardOrderHistory_DataLoaded" type="DomBool" />
+        <Declaration name="CreateNewOrder_OrderMetaPKey" type="DomPKey" />
+        <!-- Card: Delivery Documents -->
+        <Declaration name="CardDeliveryDocuments_deliveryDocList" type="LoVisitDeliveryDocuments" />
+        <Declaration name="CardDeliveryDocuments_DataLoaded" type="DomBool" />
+        <Declaration name="CardDeliveryDocuments_InformationText" type="String" />
+        <Declaration name="CardDeliveryDocuments_DisplayedSubcomponentName" type="String" />
+        <Declaration name="CardDeliveryDocuments_ContextMenuList" type="LoOrderOverviewContextMenu" />
+        <!-- Refresh Handling-->
+        <Declaration name="RefreshOrderCard" type="DomBool" />
+        <Declaration name="RefreshStoreActivitiesCard" type="DomBool" />
+         <!-- Card: Your Activities for today -->
+        <Declaration name="CardActivities_DataLoaded" type="DomBool" />
+        <Declaration name="CardActivities_List" type="LoActivitiesForStoreCockpit" />
+        <Declaration name="CardActivities_SelectedItem" type="String" />
+        <Declaration name="CreateNew_OrderMetaPKey" type="DomPKey" />
+        <Declaration name="CreateNew_OrdererPKey" type="DomPKey" />
+        <Declaration name="CreateNew_ButtonPressed" type="String" />
+        <Declaration name="isReadOnly" type="DomBool" />
+         <!-- Card: Reporting - Survey Exceptions -->
+        <Declaration name="CardReportingSurveyExceptions_DataLoaded" type="DomBool" />
+        <Declaration name="SurveyExceptions" type="Object" />
+      </Declarations>
+      <Parameters>
+        <Input name="VisitBO" type="BoCall" />
+        <Input name="CanStartVisit" type="DomBool" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <!-- Card: Order History -->
+      <Action name="CardTasks_GetOrderHistoryList" actionType="CREATE" type="LoOrderOverview">
+        <Return name="ProcessContext::CardOrderHistory_OrderList" />
+      </Action>
+      <!-- Card Controller-->
+      <Action name="CreateCardController" actionType="CREATE" type="BoHelperTourVisitCockpit">
+        <Return name="ProcessContext::CardController" />
+      </Action>
+      <Action actionType="CREATE" name="StoreCockpitCreateCardController" type="BoStoreCockpitHelper">
+        <Parameters>
+          <Input name="mobilityUserGuidance" value="ProcessContext::VisitBO.luCallMeta.mobilityUserGuidance" />
+        </Parameters>
+        <Return name="ProcessContext::StoreCockpitCardController" />
+      </Action>
+      <Action name="AssignResponsible" actionType="LOGIC" call="ApplicationContext::User.getPKey">
+        <Return name="ProcessContext::CurrentResponsiblePKey" />
+      </Action>
+      <!-- Card: Your Activities for today -->
+      <Action actionType="CREATE" name="CardActivities_GetList" type="LoActivitiesForStoreCockpit">
+        <Return name="ProcessContext::CardActivities_List" />
+      </Action>
+      <Action name="IsCallReadOnly" actionType="LOGIC" call="ProcessContext::VisitBO.isReadOnly">
+        <Return name="ProcessContext::isReadOnly" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowDeliveryCockpitUI">
+        <UIDescription>TourVisit::DeliveryCockpitUI</UIDescription>
+        <Events>
+          <!-- Visit Summary -->
+          <Event name="CardVisitSummary_loadData" action="CardVisitSummary_CallHelper" />
+          <Event name="CardContactDetails_loadData" action="LoadCustomerDetails" />
+          <Event name="CardContactDetails_showDetails" action="CardContactDetails_showDetail" />
+          <Event name="mailPressed" action="StartMail" />
+          <Event name="StartPhoneCall" action="StartPhoneCall" />
+          <!-- Card: Header -->
+          <Event name="completeCall" action="CheckForEmptyDateFields" />
+          <Event name="startVisit" action="ProcessValidationAction" />
+          <!-- Card: Order History -->
+          <Event name="CardOrderHistory_loadData" action="CardOrderHistory_LoadOrders" />
+          <Event name="CardOrderHistory_createNewOrderPressed" action="CardOrderHistory_AddNewOrder" />
+          <Event name="CardOrderHistory_itemSelected" action="CardOrderHistory_ShowSelectedOrder" />
+          <Event name="CardOrderHistory_contextMenuOpening" action="CardOrderHistory_GetContextMenu" />
+          <Event name="CardOrderHistory_contextMenuItemSelected" action="CardOrderHistory_ContextMenu_Result_Decision" />
+          <Event name="CardOrderHistory_showOrders" action="CardOrderHistory_ShowOrders" />
+          <!-- Card: Delivery Documents -->
+          <Event name="CardDeliveryDocuments_LoadData" action="CardDeliveryDoc_LoadDocuments" />
+          <Event name="CardDeliveryDocuments_itemSelected" action="CardDeliveryDoc_OpenDeliveryDoc" />
+          <Event name="CardDeliveryDocuments_contextMenuOpening" action="CardDeliveryDoc_GetContextMenu" />
+          <Event name="CardDeliveryDocuments_contextMenuItemSelected" action="CardDeliveryDoc_ContextMenu_Result_Decision" />
+          <!-- Card: Your Activities for today -->
+          <Event name="CardActivities_loadData" action="CardActivities_Load" />
+          <Event name="CardActivities_itemSelected" action="CardActivities_Redirect" />
+          <Event name="CockpitMenu_StartAssetSubProcess" action="StartAssetSubProcess" />
+        </Events>
+      </Action>
+      <Action actionType="LOAD" name="LoadCustomerDetails" type="BoCustomer">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+        </Parameters>
+        <Return name="ProcessContext::CustomerDetail" />
+        <TransitionTo action="LoadLoContactPartner" />
+      </Action>
+      <Action actionType="LOGIC" name="LoadLoContactPartner" call="ProcessContext::CustomerDetail.loadLoContactPartnerAsync">
+        <Parameters>
+          <Input name="bReload" type="Literal" value="0" />
+          <Input name="CustomerPKey" type="String" value="ProcessContext::VisitBO.bpaMainPKey" />
+        </Parameters>
+        <TransitionTo action="CheckForContactPartner" />
+      </Action>
+      <Action actionType="LOGIC" name="CheckForContactPartner" call="ProcessContext::CustomerDetail.getContactPartner">
+        <Return name="ProcessContext::CustomerContactInfo" />
+        <TransitionTo action="SetCardHeader_DataLoaded" />
+      </Action>
+      <Action actionType="LOGIC" name="SetCardHeader_DataLoaded" call="Utils.identity">
+        <Return name="ProcessContext::CardContactDetails_DataLoaded" />
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+      </Action>
+      <Action actionType="PROCESS" name="CardContactDetails_showDetail" process="Customer::CallCustomerReviewProcess">
+        <Parameters>
+          <Input name="CustomerPKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::CustomerObjectStatus" value="customerObjectState" />
+          <Return name="ProcessContext::SaveFlag" value="saveFlag" />
+          <Return name="ProcessContext::isListingModified" value="isListingModified" />
+        </ReturnValues>
+        <TransitionTo action="ReloadCustomer" />
+      </Action>
+      <Action name="ReloadCustomer" actionType="LOGIC" call="ProcessContext::VisitBO.updateCustomerInfo">
+        <Parameters>
+          <Input name="customerObjectStatus" value="ProcessContext::CustomerObjectStatus" />
+          <Input name="saveFlag" value="ProcessContext::SaveFlag" />
+        </Parameters>
+        <TransitionTo action="ListingModuleUpdateDecision" />
+      </Action>
+      <Action name="ListingModuleUpdateDecision" actionType="DECISION" parameter="ProcessContext::isListingModified">
+        <Case value="1" action="UpdateProductInitialize" />
+        <CaseElse action="LoadCustomerDetails" />
+      </Action>
+      <Action actionType="LOGIC" name="UpdateProductInitialize" call="ProcessContext::VisitBO.boJobManager.updateProductsInitialize">
+        <TransitionTo action="LoadCustomerDetails" />
+      </Action>
+      <Action actionType="LOGIC" name="StartMail" call="ProcessContext::CustomerDetail.sendMail">
+        <Parameters>
+          <Input name="Mail" value="ProcessContext::CustomerDetail.email1" />
+        </Parameters>
+      </Action>
+      <Action actionType="LOGIC" name="StartPhoneCall" call="ProcessContext::CustomerDetail.processPhoneCall">
+        <Parameters>
+          <Input name="phoneNumber" value="Event.phoneNumber" />
+        </Parameters>
+      </Action>
+      <!-- Card: Order History START -->
+      <!-- Triggers reload after tour is started -->
+      <Action name="ReloadIsCallReadOnly" actionType="LOGIC" call="ProcessContext::VisitBO.isReadOnly">
+        <Return name="ProcessContext::isReadOnly" />
+        <TransitionTo action="SetStoreActivitiesCardRefreshFlag" />
+      </Action>
+      <Action actionType="LOGIC" name="SetStoreActivitiesCardRefreshFlag" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::RefreshStoreActivitiesCard" />
+        <TransitionTo action="CardActivities_Load" />
+      </Action>
+      <Action actionType="LOGIC" name="SetOrderCardRefreshFlag" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::RefreshOrderCard" />
+        <TransitionTo action="CardOrderHistory_LoadOrders" />
+      </Action>
+      <Action actionType="LOGIC" name="CardOrderHistory_LoadOrders" call="ProcessContext::CardOrderHistory_OrderList.getOrdersForCard">
+        <Parameters>
+          <Input name="CallCustomerPKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+          <Input name="CallPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="UIPosition" type="Literal" value="Order" />
+          <Input name="numberOfListItems" value="ProcessContext::CardController.numberOfListItems" />
+          <Input name="documentType" type="Literal" value="OrderEntry" />
+        </Parameters>
+        <Return name="ProcessContext::CardOrderHistory_OrderList" />
+        <TransitionTo action="CardOrderHistory_GetCardInformation" />
+      </Action>
+      <Action actionType="LOGIC" name="CardOrderHistory_GetCardInformation" call="ProcessContext::CardOrderHistory_OrderList.getInfoForOrderHistoryCard">
+        <Return name="ProcessContext::CardOrderHistory_InformationText" />
+        <TransitionTo action="CardOrderHistory_AssignDisplayedSubcomponentName" />
+      </Action>
+      <Action name="CardOrderHistory_AssignDisplayedSubcomponentName" actionType="LOGIC" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::CardOrderHistory_OrderList" />
+          <Input name="type" value="OrderHistory" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardOrderHistory_DisplayedSubcomponentName" />
+        <TransitionTo action="CardOrderHistory_SetDataLoaded" />
+      </Action>
+      <Action name="CardOrderHistory_SetDataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::CardOrderHistory_DataLoaded" />
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_RefreshOrderCardDecision" />
+      </Action>
+      <!-- Reload Handling for Start Visit Button(s) ... START -->
+      <Action name="CardOrderHistory_RefreshOrderCardDecision" actionType="DECISION" parameter="ProcessContext::RefreshOrderCard">
+        <Case value="1" action="CardTourEnd_ResetRefreshTourCockpit" />
+      </Action>
+      <Action name="CardTourEnd_ResetRefreshTourCockpit" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="0" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::RefreshOrderCard" />
+        <TransitionTo action="RefreshTourVisitCockpit" />
+      </Action>
+      <Action name="RefreshTourVisitCockpit" actionType="LOGIC" call="CardController.triggerReload">
+        <Parameters>
+          <Input name="areaName" value="mainArea" type="Literal" />
+        </Parameters>
+        <TransitionTo action="ShowDeliveryCockpitUI" />
+      </Action>
+      <!-- Reload Handling for Start Visit Button(s) ... END -->
+      <Action name="CardOrderHistory_ShowSelectedOrder" actionType="PROCESS" process="Order::LoadProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+          <Input name="CustomerPKey" value="Event.customerPKey" />
+          <Input name="BoCall" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action name="CardOrderHistory_AddNewOrder" actionType="PROCESS" process="Order::CreateNewWizardProcess">
+        <Parameters>
+          <Input name="OrdererPKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::CreateNewOrder_OrderMetaPKey" value="orderMetaPKey" />
+        </ReturnValues>
+        <TransitionTo action="CardOrderHistory_AddNewOrder_Result_Decision" />
+      </Action>
+      <Action name="CardOrderHistory_AddNewOrder_Result_Decision" actionType="DECISION" parameter="ProcessContext::CreateNewOrder_OrderMetaPKey">
+        <CaseEmpty action="ShowDeliveryCockpitUI" />
+        <CaseElse action="CardOrderHistory_CreateNewOrderFromCallNavigation" />
+      </Action>
+      <Action actionType="PROCESS" name="CardOrderHistory_CreateNewOrderFromCallNavigation" process="Order::CreateNewProcess">
+        <Parameters>
+          <Input name="SdoMetaPKey" value="ProcessContext::CreateNewOrder_OrderMetaPKey" />
+          <Input name="OrdererPKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+          <Input name="BoCall" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_LoadOrders" />
+      </Action>
+      <Action name="CardOrderHistory_GetContextMenu" actionType="LOAD" type="LoOrderOverviewContextMenu">
+        <Parameters>
+          <Input name="deletionAllowed" value="Event.deletionAllowed" />
+          <Input name="phase" value="Event.phase" />
+          <Input name="mobilityRelevant" value="Event.mobilityRelevant" />
+          <Input name="sdoSubType" value="Event.sdoSubType" />
+          <Input name="clbMainPKey" value="Event.clbMainPKey" />
+          <Input name="callPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="clbStatus" value="ProcessContext::VisitBO.clbStatus" />
+          <Input name="responsiblePKey" value="Event.responsiblePKey" />
+          <Input name="pKey" value="Event.pKey" />
+          <Input name="syncStatus" value="Event.syncStatus" />
+        </Parameters>
+        <Return name="ProcessContext::CardOrderHistory_ContextMenuList" />
+      </Action>
+      <Action name="CardOrderHistory_ContextMenu_Result_Decision" actionType="DECISION" parameter="Event.selected">
+        <Case value="Execute" action="CardOrderHistory_ShowSelectedOrder" />
+        <Case value="Cancel" action="CardOrderHistory_CancelOrder" />
+        <Case value="Delete" action="CardOrderHistory_DeleteOrder" />
+        <Case value="Copy" action="CardOrderHistory_CopyOrder" />
+        <CaseElse action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action name="CardOrderHistory_CancelOrder" actionType="PROCESS" process="Order::CancelWizardProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_LoadOrders" />
+      </Action>
+      <Action name="CardOrderHistory_DeleteOrder" actionType="PROCESS" process="Order::DeleteWizardProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_LoadOrders" />
+      </Action>
+      <Action name="CardOrderHistory_CopyOrder" actionType="PROCESS" process="Order::CopyProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_LoadOrders" />
+      </Action>
+      <Action actionType="PROCESS" name="CardOrderHistory_ShowOrders" process="Order::OverviewCallProcess">
+        <Parameters>
+          <Input name="CallCustomerPKey" value="ProcessContext::VisitBO.bpaMainPKey" />
+          <Input name="CallPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+          <Input name="UIPosition" type="Literal" value="Order" />
+          <Input name="MainBO" value="ProcessContext::VisitBO" />
+          <Input name="DocumentType" type="Literal" value="OrderEntry" />
+        </Parameters>
+      </Action>
+      <!-- Card: Order History END -->
+      <!-- Load Tour Visit-->
+      <Action name="CardVisitSummary_CallHelper" actionType="LOGIC" call="ProcessContext::CardController.createVisitSummary">
+        <Parameters>
+          <Input name="tourVisit" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="CardVisitSummary_SetDataLoaded" />
+      </Action>
+      <Action name="CardVisitSummary_SetDataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardVisitSummary_DataLoaded" />
+      </Action>
+      <!-- START - Complete Call Check -->
+      <Action actionType="LOGIC" name="CheckForEmptyDateFields" call="ProcessContext::VisitBO.checkForEmptyCallDate">
+        <Return name="ProcessContext::ValidationResult" />
+        <TransitionTo action="EmptyCalldate_Decision" />
+      </Action>
+      <Action actionType="DECISION" name="EmptyCalldate_Decision" parameter="ProcessContext::ValidationResult">
+        <Case value="invalid" action="ShowDeliveryCockpitUI" />
+        <Case value="valid" action="CompleteCall" />
+        <CaseElse action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action actionType="PROCESS" name="CompleteCall" process="Call::CompleteCallProcess">
+        <Parameters>
+          <Input name="MainBO" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::Completed" value="completed" />
+        </ReturnValues>
+        <TransitionTo action="IsCallCompleted" />
+      </Action>
+      <Action name="IsCallCompleted" actionType="DECISION" parameter="ProcessContext::Completed">
+        <Case value="1" action="ValidateBeforeExit" />
+        <CaseElse action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action name="ValidateBeforeExit" actionType="VALIDATION">
+        <Validations>
+          <Validation name="ProcessContext::VisitBO.doValidateAsync" />
+        </Validations>
+        <TransitionTo action="End" />
+      </Action>
+      <!-- END - Complete Call Check -->
+      <Action name="ProcessValidationAction" actionType="LOGIC" call="ProcessContext::VisitBO.validGeoLocationVisit">
+        <Return name="ProcessContext::ValidationLocationResult" />
+        <TransitionTo action="ValidateLocationBeforeStart_Decision" />
+      </Action>
+      <Action name="ValidateLocationBeforeStart_Decision" actionType="DECISION" parameter="ProcessContext::ValidationLocationResult">
+        <Case value="valid" action="ProcessStartAction" />
+        <CaseElse action="SetCanStartVisitButton" />
+      </Action>
+      <Action actionType="LOGIC" name="SetCanStartVisitButton" call="Utils.identity">
+        <Return name="ProcessContext::CanStartVisit" />
+        <Parameters>
+          <Input name="value" value="true" type="Literal" />
+        </Parameters>
+      </Action>
+      <Action name="ProcessStartAction" actionType="LOGIC" call="ProcessContext::VisitBO.ProcessStartAction">
+        <Parameters>
+          <Input name="isCallFromDSD" value="true" type="Literal" />
+        </Parameters>
+        <TransitionTo action="resetVisitSummary" />
+      </Action>
+      <Action name="resetVisitSummary" actionType="LOGIC" call="ProcessContext::CardController.createVisitSummary">
+        <Parameters>
+          <Input name="tourVisit" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="SetCanStartVisit" />
+      </Action>
+      <Action actionType="LOGIC" name="SetCanStartVisit" call="Utils.identity">
+        <Return name="ProcessContext::CanStartVisit" />
+        <Parameters>
+          <Input name="value" value="false" type="Literal" />
+        </Parameters>
+        <TransitionTo action="StartTransactionForSave" />
+      </Action>
+      <Action actionType="LOGIC" name="StartTransactionForSave" call="Facade.startTransaction">
+        <TransitionTo action="SaveBoCall" />
+      </Action>
+      <Action actionType="LOGIC" name="SaveBoCall" call="ProcessContext::VisitBO.saveAsync">
+        <TransitionTo action="CommitTransactionForSave" />
+      </Action>
+      <Action actionType="LOGIC" name="CommitTransactionForSave" call="Facade.commitTransaction">
+        <TransitionTo action="ReloadIsCallReadOnly" />
+      </Action>
+      <!-- Start Delivery Doc -->
+      <Action name="CardDeliveryDoc_LoadDocuments" actionType="LOAD" type="LoVisitDeliveryDocuments">
+        <Parameters>
+          <Input name="visitId" value="ProcessContext::VisitBO.pKey" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_deliveryDocList" />
+        <TransitionTo action="CardDeliveryDoc_DetermineInformationText" />
+      </Action>
+      <Action name="CardDeliveryDoc_DetermineInformationText" actionType="LOGIC" call="ProcessContext::CardController.getCockpitListCounter">
+        <Parameters>
+          <Input name="lo" value="ProcessContext::CardDeliveryDocuments_deliveryDocList" />
+          <Input name="phoneCount" type="Literal" value="10" />
+          <Input name="tabCount" type="Literal" value="10" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_InformationText" />
+        <TransitionTo action="CardDeliveryDoc_ReduceNumberOfListItems" />
+      </Action>
+      <Action name="CardDeliveryDoc_ReduceNumberOfListItems" actionType="LOGIC" call="ProcessContext::CardController.reduceNumberOfListItems">
+        <Parameters>
+          <Input name="lo" value="ProcessContext::CardDeliveryDocuments_deliveryDocList" />
+          <Input name="phoneCount" type="Literal" value="10" />
+          <Input name="tabCount" type="Literal" value="10" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_deliveryDocList" />
+        <TransitionTo action="CardDeliveryDoc_AssignDisplayedSubcomponentName" />
+      </Action>
+      <Action name="CardDeliveryDoc_AssignDisplayedSubcomponentName" actionType="LOGIC" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::CardDeliveryDocuments_deliveryDocList" />
+          <Input name="type" value="DeliveryDocument" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_DisplayedSubcomponentName" />
+        <TransitionTo action="CardDeliveryDoc_SetDataLoaded" />
+      </Action>
+      <Action name="CardDeliveryDoc_SetDataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_DataLoaded" />
+      </Action>
+      <!-- LOAD -->
+      <Action name="CardDeliveryDoc_OpenDeliveryDoc" actionType="PROCESS" process="Order::LoadProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CustomerPKey" value="Event.customerId" />
+        </Parameters>
+      </Action>
+      <!-- Delivery Doc Context Menu -->
+      <Action actionType="LOAD" name="CardDeliveryDoc_GetContextMenu" type="LoOrderOverviewContextMenu">
+        <Parameters>
+          <Input name="deletionAllowed" value="Event.deletionAllowed" />
+          <Input name="phase" value="Event.phase" />
+          <Input name="mobilityRelevant" value="Event.mobilityRelevant" />
+          <Input name="sdoSubType" value="Event.sdoSubType" />
+          <Input name="clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="callPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="clbStatus" value="ProcessContext::VisitBO.clbStatus" />
+          <Input name="responsiblePKey" value="ProcessContext::VisitBO.responsiblePKey" />
+          <Input name="pKey" value="Event.pKey" />
+          <Input name="syncStatus" value="Event.syncStatus" />
+          <!-- Hardcoded documentType to "Delivery" because documentType information is not present for Visit Order-->
+          <Input name="documentType" value="Delivery" />
+        </Parameters>
+        <Return name="ProcessContext::CardDeliveryDocuments_ContextMenuList" />
+      </Action>
+      <Action name="CardDeliveryDoc_ContextMenu_Result_Decision" actionType="DECISION" parameter="Event.selected">
+        <Case value="Execute" action="CardDeliveryDoc_OpenDeliveryDoc" />
+        <Case value="Cancel" action="CardDeliveryDoc_CancelDeliveryDoc" />
+        <CaseElse action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action name="CardDeliveryDoc_CancelDeliveryDoc" actionType="PROCESS" process="Order::CancelWizardProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ClbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallInContext_clbMainPKey" value="ProcessContext::VisitBO.pKey" />
+          <Input name="CallOutOfStockProducts" value="ProcessContext::VisitBO.boJobManager.outOfStockProducts" />
+        </Parameters>
+        <TransitionTo action="CardDeliveryDoc_LoadDocuments" />
+      </Action>
+      <!-- End Delivery Doc -->
+      <!-- Card: Your Activities for today -->
+      <Action actionType="LOGIC" name="CardActivities_Load" call="ProcessContext::CardActivities_List.getActivitiesForCard">
+        <Parameters>
+          <Input name="CallStatus" value="ProcessContext::VisitBO.clbStatus" />
+          <Input name="mobilityUserGuidance" value="ProcessContext::VisitBO.luCallMeta.mobilityUserGuidance" />
+          <Input name="isReadOnly" value="ProcessContext::isReadOnly" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_List" />
+        <TransitionTo action="setCardActivitiesLoadData" />
+      </Action>
+      <Action actionType="LOGIC" name="setCardActivitiesLoadData" call="Utils.identity">
+        <Return name="ProcessContext::CardActivities_DataLoaded" />
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <TransitionTo action="CardOrderHistory_RefreshStoreActivitiesCardDecision" />
+      </Action>
+      <Action name="CardOrderHistory_RefreshStoreActivitiesCardDecision" actionType="DECISION" parameter="ProcessContext::RefreshStoreActivitiesCard">
+        <Case value="1" action="UpdateRefreshStoreActivitiesCard" />
+      </Action>
+      <Action name="UpdateRefreshStoreActivitiesCard" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="0" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::RefreshStoreActivitiesCard" />
+        <TransitionTo action="SetOrderCardRefreshFlag" />
+      </Action>
+       <Action actionType="DECISION" name="CardActivities_Redirect" parameter="Event.id">
+        <Case value="Survey" action="CardReportingSurveyExceptions_ResetDataReady" />
+        <Case value="Promotion" action="CardActivities_ShowQuestionProcess" />
+        <Case value="CreateOrder" action="CardOrderHistory_AddNewOrder" />
+        <Case value="TrackAssets" action="StartAssetSubProcess" />
+        <CaseElse action="ShowDeliveryCockpitUI" />
+      </Action>
+      <Action actionType="LOGIC" name="CardReportingSurveyExceptions_ResetDataReady" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="0" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardReportingSurveyExceptions_DataLoaded" />
+        <TransitionTo action="CardActivities_ShowSurveyProcess" />
+      </Action>
+      <Action actionType="PROCESS" name="CardActivities_ShowSurveyProcess" process="Call::SurveyTabProcess">
+        <Parameters>
+          <Input name="MainBO" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="ResetLoPOSAfterSurveyTabProcess" />
+      </Action>
+      <!-- Setting LoPos invalidated triggers a reset of the current loPos in the loadAndSetPrerequisites
+           Without doing that survey activities are not filtered according to the selected product when entering the survey page.
+           This action should be called before entering the SurveyTabProcess 
+      -->
+      <Action name="ResetLoPOSAfterSurveyTabProcess" actionType="LOGIC" call="ProcessContext::VisitBO.boJobManager.setLoPOSInvalidated">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <TransitionTo action="Save_LoadAndSetPrerequisites_ForExcceptions" />
+      </Action>
+      <Action actionType="PROCESS" name="CardActivities_ShowQuestionProcess" process="Call::QuestionTabProcess">
+        <Parameters>
+          <Input name="MainBO" value="ProcessContext::VisitBO" />
+        </Parameters>
+        <TransitionTo action="ResetLoPOSAfterQuestionTabProcess" />
+      </Action>
+      <Action name="ResetLoPOSAfterQuestionTabProcess" actionType="LOGIC" call="ProcessContext::VisitBO.boJobManager.setLoPOSInvalidated">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <TransitionTo action="Save_LoadAndSetPrerequisites_ForExcceptions" />
+      </Action>
+      <Action actionType="LOGIC" name="Save_LoadAndSetPrerequisites_ForExcceptions" call="Facade.startTransaction">
+        <TransitionTo action="doSave_LoadAndSetPrerequisites_ForExcceptions" />
+      </Action>
+      <Action actionType="LOGIC" name="doSave_LoadAndSetPrerequisites_ForExcceptions" call="ProcessContext::VisitBO.saveAsync">
+        <TransitionTo action="Save_LoadAndSetPrerequisites_ForExcceptions_Commit" />
+      </Action>
+      <Action actionType="LOGIC" name="Save_LoadAndSetPrerequisites_ForExcceptions_Commit" call="Facade.commitTransaction">
+        <TransitionTo action="LoadAndSetPrerequisites_Complete" />
+      </Action>
+      <Action name="LoadAndSetPrerequisites_Complete" actionType="LOGIC" call="ProcessContext::VisitBO.boJobManager.loadAndSetPrerequisites">
+        <Parameters>
+          <Input name="loadType" type="Literal" value="ExceptionCard" />
+        </Parameters>
+        <TransitionTo action="AssignDisplayedSubcomponentNameForSurveyExceptions" />
+      </Action>
+      <Action actionType="LOGIC" name="AssignDisplayedSubcomponentNameForSurveyExceptions" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::VisitBO.boJobManager.loCurrentSurveys" />
+          <Input name="type" value="SurveyExceptions" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardSurveyExceptions_DisplayedSubcomponentName" />
+        <TransitionTo action="CalculateSurveyExceptions" />
+      </Action>
+      <Action actionType="LOGIC" name="CalculateSurveyExceptions" call="ProcessContext::StoreCockpitCardController.getSurveyExceptions">
+        <Parameters>
+          <Input name="currentSurveys" value="ProcessContext::VisitBO.boJobManager.loCurrentSurveys" />
+        </Parameters>
+        <Return name="ProcessContext::SurveyExceptions" />
+        <TransitionTo action="CardReportingSurveyExceptions_SetDataReady" />
+      </Action>
+      <Action actionType="LOGIC" name="CardReportingSurveyExceptions_SetDataReady" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardReportingSurveyExceptions_DataLoaded" />
+      </Action>
+      <Action actionType="PROCESS" name="StartAssetSubProcess" process="AssetManagement::CallAssetOverviewProcess">
+        <Parameters>
+          <Input name="ClbBO" value="ProcessContext::VisitBO" />
+          <Input name="From" type="Literal" value="Navigation" />
+        </Parameters>
+        <TransitionTo action="Save_Only" />
+      </Action>
+      <Action actionType="LOGIC" name="Save_Only" call="Facade.startTransaction">
+        <TransitionTo action="doSave_Only" />
+      </Action>
+      <Action actionType="LOGIC" name="doSave_Only" call="ProcessContext::VisitBO.saveAsync">
+        <TransitionTo action="Save_Only_Commit" />
+      </Action>
+      <Action actionType="LOGIC" name="Save_Only_Commit" call="Facade.commitTransaction"></Action>
+      <Action actionType="LOGIC" name="launchAgentforce" call="ProcessContext::StoreCockpitCardController.launchAgentforce">
+        <Parameters>
+          <Input name="objectName" type="Literal" value="Account" />
+          <Input name="recordId" value="ProcessContext::VisitBO.bpaMainPKey" />
+          <Input name="accountName" value="ProcessContext::VisitBO.luCustomer.name" />
+        </Parameters>
+      </Action>
+    </Actions>
+  </Body>
+  <ExternalEvents>
+    <Event name="agentforceLaunchEvent" action="launchAgentforce" />
+  </ExternalEvents>
+</Process>

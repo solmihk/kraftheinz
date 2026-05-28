@@ -1,0 +1,13 @@
+<ListItem name="LiTourObjectReference">
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" dataSourceProperty="pKey" />
+    <SimpleProperty name="tourId" type="DomPKey" dataSourceProperty="tourId" />
+    <SimpleProperty name="orderTemplateId" type="DomPKey" dataSourceProperty="orderTemplateId" />
+    <SimpleProperty name="visitTemplateId" type="DomPKey" dataSourceProperty="visitTemplateId" />
+    <SimpleProperty name="usage" type="DomTmgUsage" dataSourceProperty="usage" /> <!-- TODO: Is this domain correct? -->
+    <SimpleProperty name="sysReleaseProcessPKey" type="DomPKey" dataSourceProperty="sysSignatureMetaPKey" />
+    <SimpleProperty name="usedForStartOfDay" type="DomBool" storable="false" dataSourceProperty="usedForStartOfDay" />
+    <SimpleProperty name="usedForEndOfDay" type="DomBool" storable="false" dataSourceProperty="usedForEndOfDay" />
+    <SimpleProperty name="prdCheckInPolicy" type="DomSdoPrdCheckInPolicy" storable="false" dataSourceProperty="prdCheckInPolicy" />
+  </SimpleProperties>
+</ListItem>

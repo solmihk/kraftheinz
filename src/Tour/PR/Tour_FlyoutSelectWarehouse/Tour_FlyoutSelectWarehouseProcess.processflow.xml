@@ -1,0 +1,29 @@
+<Process name="Tour::FlyoutSelectWarehouseProcess" defaultAction="ShowFlyoutSelectWarehouseUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="WarehouseList" type="LoWarehouseByUser" />
+      </Declarations>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="GetWarehouseList" actionType="LOAD" type="LoWarehouseByUser">
+        <Return name="ProcessContext::WarehouseList" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowFlyoutSelectWarehouseUI">
+        <UIDescription>Tour::FlyoutSelectWarehouseUI</UIDescription>
+        <Events>
+          <Event name="itemSelected" action="AssignWarehouseId" />
+        </Events>
+      </Action>
+      <Action actionType="END" name="AssignWarehouseId">
+        <ReturnValues>
+          <Return name="warehouseId" value="Event.warehouseId" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

@@ -1,0 +1,33 @@
+<UIDescription name="Tour::FlyoutSelectWarehouseUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionDialogPage" onBackDiscard="true">
+    <PageHeader>
+      <Bindings>
+        <Resource target="title" type="Label" id="WarehouseLookupTitleId" defaultLabel="Warehouse" />
+      </Bindings>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Area areaName="mainArea" areaPattern="SingleElementArea">
+        <GroupedList name="WarehouseList" dataSource="ProcessContext::WarehouseList.Items[]">
+          <Items name="Items" itemPattern="TourWarehouseListItem">
+            <Bindings>
+              <Binding target="warehouseDescription" type="Text" binding=".warehouseDescription" bindingMode="ONE_WAY" />
+            </Bindings>
+            <MenuItems></MenuItems>
+            <ItemListLayout>
+              <Col>
+                <Row layoutType="itemValueSmall itemLeft" bindingId="warehouseDescription" />
+              </Col>
+            </ItemListLayout>
+          </Items>
+          <Events>
+            <ItemSelectedEvent event="itemSelected">
+              <Params>
+                <Param name="warehouseId" value=".warehousePKey" />
+              </Params>
+            </ItemSelectedEvent>
+          </Events>
+        </GroupedList>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

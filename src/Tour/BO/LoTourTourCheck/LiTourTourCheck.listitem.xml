@@ -1,0 +1,15 @@
+<ListItem name="LiTourTourCheck">
+  <SimpleProperties>
+      <!-- You can use <workspaceRoot>/contractSnippets/YourModule Section/BO/LO_ListObject/snippets/ListItemSimplePropertiesSimplePropertySnipp.xml as template for your case -->
+    <SimpleProperty name="pKey" type="DomPKey" />
+    <SimpleProperty name="tourId" type="DomText" />
+    <SimpleProperty name="description" type="DomText" />
+    <SimpleProperty name="checkType" type="DomTourCheckType" />
+    <SimpleProperty name="sort" type="DomInteger" />
+    <SimpleProperty name="usage" type="DomTourCheckUsage" />
+    <SimpleProperty name="answer" type="DomBool" />
+    <SimpleProperty name="groupUsage" type="DomText" />
+    <SimpleProperty name="dataType" type="DomText" dataSourceProperty="dataType" />
+    <SimpleProperty name="toggleId" type="DomText" dataSourceProperty="toggleId" />
+  </SimpleProperties>
+</ListItem>

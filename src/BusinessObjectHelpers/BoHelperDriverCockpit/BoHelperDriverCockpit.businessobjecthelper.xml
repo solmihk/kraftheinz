@@ -1,0 +1,21 @@
+<BusinessObjectHelper name="BoHelperDriverCockpit" schemaVersion="1.1">
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" />
+    <SimpleProperty name="collapseState_CardTourSchedule" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardUserWelcome" type="DomBool" />
+    <SimpleProperty name="cardUserWelcome_DateText" type="DomText" />
+    <SimpleProperty name="isTourUser" type="DomBool" />
+    <SimpleProperty name="collapseState_CardUserNotifications" type="DomBool" />
+  </SimpleProperties>
+  <Methods>
+    <Method name="beforeCreateAsync" />
+    <Method name="afterCreateAsync" />
+    <Method name="createAsync" />
+    <Method name="isCardVisible" />
+    <Method name="isCardCollapsible" />
+    <Method name="getDisplayedSubcomponentName" />
+    <Method name="getCockpitListCounter" />
+    <Method name="reduceNumberOfListItems" />
+    <Method name="getButtonLabel" />
+  </Methods>
+</BusinessObjectHelper>

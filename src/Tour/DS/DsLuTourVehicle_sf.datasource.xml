@@ -1,0 +1,19 @@
+<DataSource name="DsLuTourVehicle" backendSystem="sf" businessObjectClass="LuTourVehicle" external="false" editableEntity="Vehicle__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Vehicle__c" column="Id" />
+    <Attribute name="name" table="Vehicle__c" column="Name" />
+    <Attribute name="description" table="Vehicle__c" column="Description_#Language#__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Vehicle__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Vehicle__c.Id = #pKey#
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="pKey" type="TEXT"/>
+  </Parameters>
+</DataSource>

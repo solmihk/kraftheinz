@@ -1,0 +1,10 @@
+<ListItem name="LiTourSchedule">
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" storable="false" dataSourceProperty="pKey" />
+    <SimpleProperty name="description" type="DomId" storable="false" dataSourceProperty="description" />
+    <SimpleProperty name="dateFrom" type="DomDate" storable="false" dataSourceProperty="dateFrom" />
+    <SimpleProperty name="status" type="DomTmgStatus" storable="false" dataSourceProperty="status" />
+    <SimpleProperty name="visitCount" type="DomString" storable="false" dataSourceProperty="visitCount" />
+    <SimpleProperty name="statusIcon" type="DomString" storable="false" dataSourceProperty="statusIcon" />
+  </SimpleProperties>
+</ListItem>

@@ -1,0 +1,127 @@
+<UIDescription name="TourVisit::TourVisitMapUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SplitScreenPage" leftSectionFlex="1" rightSectionFlex="1" selectFirstItemInList="false">
+    <PageHeader>
+      <Bindings>
+        <Binding target="title" binding="ProcessContext::TourBo.tourName" />
+      </Bindings>
+      <SplitScreenButtons>
+        <LeftSectionButton directlyVisible="true">
+          <Bindings>
+            <Resource target="Text" type="Label" id="AgendaMapShowId" defaultLabel="Show Map" />
+            <Resource target="Icon" type="Image" id="ShowMap" />
+          </Bindings>
+        </LeftSectionButton>
+        <RightSectionButton directlyVisible="true">
+          <Bindings>
+            <Resource target="Text" type="Label" id="AgendaMapHideId" defaultLabel="Hide Map" />
+            <Resource target="Icon" type="Image" id="ShowFilter" />
+          </Bindings>
+        </RightSectionButton>
+      </SplitScreenButtons>
+    </PageHeader>
+    <Section sectionName="leftSection" sectionPattern="SingleAreaSection">
+      <Area areaName="TourVisitsList" areaPattern="SingleElementArea">
+        <GroupedList name="TourVisitsList" hasBorder="true" dataSource="ProcessContext::TourVisits.Items[]">
+          <Items name="Items" itemPattern="TourVisitsListItems">
+            <ItemListLayout>
+              <Default>
+                <Col width="2.2em" height="1.6em" layoutType="Image" bindingId="visitTypeImage" />
+                <Col width="4.4em">
+                  <Row layoutType="itemValue" bindingId="visitStatus" />
+                  <Row layoutType="itemValue" bindingId="startTime" />
+                </Col>
+                <Col flex="1">
+                  <Row layoutType="itemIdentifier" bindingId="customerName" />
+                  <Row layoutType="itemSecondary" bindingId="customerAddress" />
+                  <Row>
+                    <Col  width="1em" height="1em" layoutType="Image" bindingId="documentCountImage" />
+                    <Col layoutType="itemSecondary" bindingId="documentCount" />
+                  </Row>
+                </Col>
+                <Col width="0.5em" height="0.5em" layoutType="Image" bindingId="mapPinImage" align="right" />
+                <Col width="0.3em" layoutType="itemSecondary" bindingId="Spacer" />
+              </Default>
+            </ItemListLayout>
+            <ContextMenu>
+              <Bindings>
+                <Binding target="DataSource" binding="ProcessContext::ContextMenuList.Items[]" bindingMode="ONE_WAY" />
+              </Bindings>
+              <Items name="ContextMenuItems">
+                <Bindings>
+                  <Binding target="Icon" type="Image" binding=".actionImg" />
+                  <Binding target="Text" type="Label" binding=".actionId" />
+                  <Binding type="Editable" target="Editable" binding=".actionEnabled" />
+                </Bindings>
+              </Items>
+            </ContextMenu>
+            <Bindings>
+              <Binding target="visitTypeImage" type="Image" binding=".visitTypeImage" bindingMode="ONE_WAY" />
+              <Binding target="startTime" type="Text" binding=".startTime" bindingMode="ONE_WAY" />
+              <Binding target="customerName" type="Text" binding=".customerName" bindingMode="ONE_WAY" />
+              <Binding target="customerAddress" type="Text" binding=".customerAddress" bindingMode="ONE_WAY" />
+              <Resource target="documentCountImage" type="Image" id="Note_LM" />
+              <Binding target="documentCount" type="Text" binding=".documentCount" bindingMode="ONE_WAY" />
+              <Binding target="mapPinImage" type="Image" binding=".mapPinImage" bindingMode="ONE_WAY" />
+              <Resource target="Spacer" type="Label" id="Spacer" defaultLabel="  " />
+              <Binding target="visitStatus" type="Text" binding=".status.text" bindingMode="ONE_WAY" />
+            </Bindings>
+          </Items>
+          <Events>
+            <ItemSelectedEvent event="VisitItemSelected">
+              <Params>
+                <Param name="pKey" value=".pKey" />
+                <Param name="visitStatus" value=".status"/>
+                <Param name="customerId" value=".customerId" />
+              </Params>
+            </ItemSelectedEvent>
+            <ContextOpeningEvent event="ContextMenuOpening">
+              <Params>
+                <Param name="pKey" value=".pKey" />
+                <Param name="visitStatus" value=".status" />
+                <Param name="customerId" value=".customerId" />
+              </Params>
+            </ContextOpeningEvent>
+            <ContextSelectedEvent event="ContextMenuItemSelected">
+              <Params>
+                <Param name="pKey" value=".pKey" />
+                <Param name="customerId" value=".customerId" />
+              </Params>
+            </ContextSelectedEvent> 
+          </Events>
+        </GroupedList>
+      </Area>
+    </Section>
+    <Section sectionName="rightSection" sectionPattern="SingleAreaSection">
+      <Area areaName="detailArea" areaPattern="SingleElementArea">
+        <GoogleMap dataSource="ProcessContext::TourVisits.items[]" name="TourMap" latitudeField="latitude" longitudeField="longitude">
+          <Bindings>
+            <Binding target="DisplayRoute" binding="ProcessContext::Map_DisplayRoute" bindingMode="ONE_WAY" />
+            <Binding target="DisplayTraffic" binding="ProcessContext::Map_DisplayTraffic" bindingMode="ONE_WAY" />
+          </Bindings>
+          <GoogleMapDetails name="VisitsMapDetails">
+            <Bindings>
+              <Binding target="Visible" type="Boolean" binding="ProcessContext::Map_ShowMapDetails" bindingMode="TWO_WAY" />
+            </Bindings>
+            <CockpitSections name="MapDetailsSections">
+              <CockpitSection name="CustomerDetailSection" sectionPattern="3columns" showSeparator="true">
+                <Bindings>
+                  <Binding target="col1row1" type="Blob" binding="ProcessContext::Map_Details.customerProfilePicture" roundedEdge="true" fileTypeBinding="ProcessContext::Map_Details.customerPictureFileType" defaultImage="StoreCockpit" verticalAlignment="Top" defaultImageType=".svg" />
+                  <Binding target="col2row1" type="ItemIdentifier" binding="ProcessContext::Map_Details.name" />
+                  <Binding target="col2row2" type="ItemSecondary" binding="ProcessContext::Map_Details.mainAddress" />
+                  <Binding target="col2row3" type="ItemSecondary" binding="ProcessContext::Map_Details.distance" />
+                </Bindings>
+              </CockpitSection>
+            </CockpitSections>
+          </GoogleMapDetails>
+          <Events>
+            <MapMarkerSelectedEvent event="loadGoogleMapDetails">
+              <Params>
+                <Param name="pkey" value=".pKey" />
+              </Params>
+            </MapMarkerSelectedEvent>
+          </Events>
+        </GoogleMap>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

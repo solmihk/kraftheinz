@@ -1,0 +1,14 @@
+<LookupObject name="LuTourTemplateData" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLuTourTemplateData" />
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" dataSourceProperty="pKey" />
+    <SimpleProperty name="tourTemplateName" type="DomBpaName" dataSourceProperty="tourTemplateName" />
+    <SimpleProperty name="considerMultipleWarehouses" type="DomBool" dataSourceProperty="considerMultipleWarehouses" />
+    <SimpleProperty name="syncOptions" type="DomTmgSyncOptions" dataSourceProperty="syncOptions" />
+  </SimpleProperties>
+  <Methods>
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="loadAsync" />
+  </Methods>
+</LookupObject>

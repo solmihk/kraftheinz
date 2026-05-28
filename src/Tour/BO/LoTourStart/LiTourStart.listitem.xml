@@ -1,0 +1,9 @@
+<ListItem name="LiTourStart">
+    <SimpleProperties>
+      <SimpleProperty id="true" name="pKey" type="DomPKey" storable="false" />
+      <SimpleProperty name="activityName" type="DomText" storable="false" />
+      <SimpleProperty name="status" type="DomString" storable="true" />
+      <SimpleProperty name="mandatory" type="DomString" storable="true" />
+      <SimpleProperty name="activityId" type="DomText" storable="false"/>
+    </SimpleProperties>
+</ListItem>

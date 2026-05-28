@@ -1,0 +1,78 @@
+<Process name="InventoryDocument::LoadProcess" defaultAction="CheckIfDataIsAvailable" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="SfReplicationCallbacks" type="BoSfReplicationCallbacks" />
+        <Declaration name="IsInventoryDocumentItemsAvailable" type="DomBool" />
+        <Declaration name="BoInventoryDocument" type="BoInventoryDocument" />
+        <Declaration name="TriggerReload" type="DomBool" />
+      </Declarations>
+      <Parameters>
+        <Input name="InventoryDocumentId" type="DomPKey" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="CreateReplicationCallBacksBo" actionType="CREATE" type="BoSfReplicationCallbacks">
+        <Return name="ProcessContext::SfReplicationCallbacks" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="CheckIfDataIsAvailable" actionType="LOGIC" call="ProcessContext::SfReplicationCallbacks.isDSDOrderOnDemandDataAvailable">
+        <Parameters>
+          <Input name="orderId" value="ProcessContext::InventoryDocumentId" />
+        </Parameters>
+        <Return name="ProcessContext::IsInventoryDocumentItemsAvailable" />
+        <TransitionTo action="CanLoadInventoryDocumentDecision" />
+      </Action>
+      <Action name="CanLoadInventoryDocumentDecision" actionType="DECISION" parameter="ProcessContext::IsInventoryDocumentItemsAvailable">
+        <Case value="1" action="LoadInventoryDocument" />
+        <Case value="2" action="Message_LoadingInventoryDocumentItems" />
+        <CaseElse action="Message_InventoryDocumentItemsDataNotOnDevice" />
+      </Action>
+      <Action name="Message_LoadingInventoryDocumentItems" actionType="CONFIRM" confirmType="Ok">
+        <Message messageId="InventoryDocumentItemsLoadingInProgress" />
+        <Cases>
+          <Case value="Ok" action="EndWithoutReload" />
+        </Cases>
+      </Action>
+      <Action name="Message_InventoryDocumentItemsDataNotOnDevice" actionType="CONFIRM" confirmType="YesNo">
+        <Message messageId="InventoryDocumentItemsRequestOnDemandData" />
+        <Cases>
+          <Case value="Yes" action="RequestOnDemandData" />
+          <Case value="No" action="EndWithoutReload" />
+        </Cases>
+      </Action>
+      <Action name="RequestOnDemandData" actionType="LOGIC" call="ProcessContext::SfReplicationCallbacks.requestDSDOrderOnDemandDataAsync">
+        <Parameters>
+          <Input name="inventoryDocumentId" value="ProcessContext::InventoryDocumentId" />
+        </Parameters>
+        <TransitionTo action="EndWithoutReload" />
+      </Action>
+      <Action name="LoadInventoryDocument" actionType="LOAD" type="BoInventoryDocument">
+        <Parameters>
+          <Input name="inventoryDocumentId" value="ProcessContext::InventoryDocumentId" />
+        </Parameters>
+        <Return name="ProcessContext::BoInventoryDocument" />
+        <TransitionTo action="OpenInventoryDocumentUI" />
+      </Action>
+      <Action name="OpenInventoryDocumentUI" actionType="PROCESS" process="InventoryDocument::NavigationProcess">
+        <Parameters>
+          <Input name="BoInventoryDocument" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+        <TransitionTo action="EndWithReload" />
+      </Action>
+      <Action actionType="END" name="EndWithoutReload">
+        <ReturnValues>
+          <Return name="TriggerReload" value="0" />
+        </ReturnValues>
+      </Action>
+      <Action actionType="END" name="EndWithReload">
+        <ReturnValues>
+          <Return name="TriggerReload" value="1" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

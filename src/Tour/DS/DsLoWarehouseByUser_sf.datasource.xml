@@ -1,0 +1,24 @@
+<DataSource name="DsLoWarehouseByUser" backendSystem="sf" businessObjectClass="LoWarehouseByUser" external="false" editableEntity="Warehouse_User__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="warehousePKey" table="Warehouse__c" column="Id" />
+    <Attribute name="warehouseName" table="Warehouse__c" column="Name" />
+    <Attribute name="warehouseDescription" table="Warehouse__c" column="Description_#Language#__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Warehouse_User__c" alias="" idAttribute="Id" />
+    <Entity name="Warehouse__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Warehouse_User__c.Warehouse__c" comparator="eq" rightSideType="Attribute" rightSideValue="Warehouse__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Warehouse_User__c.User__c = '#UserPKey#' AND Warehouse_User__c.Active__c = '1'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters />
+</DataSource>

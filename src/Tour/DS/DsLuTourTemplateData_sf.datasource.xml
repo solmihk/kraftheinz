@@ -1,0 +1,20 @@
+<DataSource name="DsLuTourTemplateData" backendSystem="sf" businessObjectClass="LuTourTemplateData" external="false" editableEntity="Tour_Template__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Tour_Template__c" column="Id" />
+    <Attribute name="tourTemplateName" table="Tour_Template__c" column="Name" />
+    <Attribute name="considerMultipleWarehouses" table="Tour_Template__c" column="Consider_Multiple_Warehouses__c" />
+    <Attribute name="syncOptions" table="Tour_Template__c" column="Sync_Options__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour_Template__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Tour_Template__c.Id = #pKey#
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="pKey" type="TEXT" />
+  </Parameters>
+</DataSource>

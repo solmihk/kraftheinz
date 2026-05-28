@@ -1,0 +1,27 @@
+<DataSource name="DsLoVehicleByWarehouse" backendSystem="sf" businessObjectClass="LoVehicleByWarehouse" external="false" editableEntity="Vehicle_Warehouse__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Vehicle__c" column="Id" />
+    <Attribute name="name" table="Vehicle__c" column="Name" />
+    <Attribute name="description" table="Vehicle__c" column="Description_#Language#__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Vehicle_Warehouse__c" alias="" idAttribute="Id" />
+    <Entity name="Vehicle__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Vehicle_Warehouse__c.Vehicle__c" comparator="eq" rightSideType="Attribute" rightSideValue="Vehicle__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Vehicle_Warehouse__c.Warehouse__c = '#warehouseId#' AND Vehicle__c.Vehicle_Type__c IN (#vehicleTypes#) AND Vehicle_Warehouse__c.Active__c = '1'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="warehouseId" type="TEXT" />
+    <Parameter name="vehicleTypes" type="LIST" />
+  </Parameters>
+</DataSource>

@@ -1,0 +1,12 @@
+<ListItem name="LiWarehouseProducts">
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" dataSourceProperty="pKey" />
+    <SimpleProperty name="warehouseId" type="DomId" dataSourceProperty="warehouseId" />
+    <SimpleProperty name="productId" type="DomPKey" dataSourceProperty="productId" />
+    <SimpleProperty name="isActive" type="DomBool" dataSourceProperty="isActive" />
+    <SimpleProperty name="productDescription1" type="DomText" dataSourceProperty="productDescription1" />
+    <SimpleProperty name="groupingAttribute" type="DomText" dataSourceProperty="groupingAttribute" />
+    <SimpleProperty name="consumerGoodsProductCode" type="DomText" dataSourceProperty="consumerGoodsProductCode" />
+    <SimpleProperty name="gtin" type="DomText" dataSourceProperty="gtin" />
+  </SimpleProperties>
+</ListItem>

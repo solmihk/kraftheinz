@@ -1,0 +1,13 @@
+<LookupObject name="LuTourVehicle" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLuTourVehicle" />
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" dataSourceProperty="pKey" />
+    <SimpleProperty name="name" type="DomBpaName" dataSourceProperty="name" />
+    <SimpleProperty name="description" type="DomString" dataSourceProperty="description" />
+  </SimpleProperties>
+  <Methods>
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="loadAsync" />
+  </Methods>
+</LookupObject>

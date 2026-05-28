@@ -1,0 +1,17 @@
+<DataSource name="DsLuTourCountRemaining" backendSystem="sf" businessObjectClass="LuTourCountRemaining" external="false" editableEntity="Tour__c" schemaVersion="2.0">
+  <Attributes>
+    <DerivedAttribute name="tourCountRemaining" value="Count(*)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Tour__c.Default_Driver__c= '#UserPKey#' 
+      AND Tour__c.Status__c != 'Canceled' 
+      AND Tour__c.Status__c != 'Completed'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters />
+</DataSource>

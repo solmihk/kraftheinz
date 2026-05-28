@@ -1,0 +1,138 @@
+<UIDescription name="InventoryDocument::ItemTabUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="MasterDetailSectionPage" masterSectionFlex="4.6" detailSectionFlex="3.7" cachable="false">
+    <PageHeader>
+      <Bindings>
+        <Binding target="title" type="Text" binding="ProcessContext::BoInventoryDocument.description" bindingMode="ONE_WAY" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem itemId="ScanProduct" directlyVisible="true">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isScanProductVisible" />
+            <Resource target="Text" type="Label" id="ScanProduct" defaultLabel="Scan Product" />
+            <Resource target="Icon" type="Image" id="BarcodeDarkGrey24" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="addProductViaScanner" />
+          </Events>
+        </MenuItem>
+        <MenuItem itemId="addProduct" directlyVisible="true">
+          <Bindings>
+            <Resource target="Text" type="Label" id="addProductViaLookup" defaultLabel="Add Product" />
+            <Resource target="Icon" type="Image" id="PlusDarkGrey24" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isAddProductVisible" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="addProduct" />
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Area areaName="mainArea" areaPattern="SingleElementArea">
+        <GroupedList name="InventoryDocumentItemList" numberpadDefaultField="quantity" showPreviousNextEnter="true" searchable="true" groupBy="criterion3ProductDescription" sortBy="criterion3ProductDescription" sortInsideGroupBy="description1" sortDirectionInGroup="ASC" dataSource="ProcessContext::BoInventoryDocument.LoItemsMainList.Items[]" direction="ASC" master="true">
+          <Items name="Items" itemPattern="InventoryDocumentItemList">
+            <ItemListLayout>
+              <Default>
+                <Col width="0.1em" layoutType="itemRight" bindingId="iconModReason" />
+                <Col flex="1">
+                  <Row layoutType="itemIdentifier" bindingId="description" />
+                  <Row layoutType="itemSecondary" bindingId="orderUnitInformation" />
+                  <Row layoutType="itemSecondary" bindingId="additionalUnitsInformation" />
+                </Col>
+                <Col layoutType="itemRight" bindingId="quantity" />
+              </Default>
+            </ItemListLayout>
+            <Bindings>
+              <Binding target="description" type="Text" binding=".description1" bindingMode="ONE_WAY" />
+              <Binding target="orderUnitInformation" type="Text" binding=".orderUnitInformation" bindingMode="ONE_WAY"/>
+              <Binding target="additionalUnitsInformation" type="Text" binding=".additionalUnitsInformation" bindingMode="ONE_WAY"/>
+              <Binding target="quantity" type="Stepper" binding=".quantity" minValue="0" maxValue="9999" bindingMode="TWO_WAY" formatV2="4.0" stepperCorrelationId=".pKey" />
+              <Binding target="iconModReason" type="Image" binding=".iconModReasonMainList" bindingMode="ONE_WAY" />
+            </Bindings>
+          </Items>
+          <Events>
+            <ItemSelectedEvent event="InventoryDocumentItemList_itemSelected">
+              <Params>
+                <Param name="itemId" value=".pkey" />
+                <Param name="productId" value=".productId" />
+              </Params>
+            </ItemSelectedEvent>
+          </Events>
+          <SearchAttributes>
+            <SearchAttribute name="description1"/>
+            <SearchAttribute name="consumerGoodsProductCode"/>
+            <SearchAttribute name="gtin"/>
+          </SearchAttributes>
+        </GroupedList>
+      </Area>
+    </Section>
+    <Section sectionName="detailSection" sectionPattern="SingleAreaSection">
+      <Area areaName="mainArea" areaPattern="GroupedElementsArea">
+        <GroupElement name="IdentificationGroup">
+          <Bindings>
+            <Binding target="Title" binding="ProcessContext::BoInventoryDocument.LoItemsMainList.Current.description1" bindingMode="ONE_WAY" />
+          </Bindings>
+          <InputArea name="consumerGoodsProductCode" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Product Code" id="ProductCode" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.LoItemsMainList.Current.consumerGoodsProductCode" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+        </GroupElement>
+        <EmbeddedList name="loItemsUnitOfMeasureList" dataSource="ProcessContext::BoInventoryDocument.LoItemsUnitOfMeasureList.Items[]">
+          <Bindings>
+            <Resource target="Title" type="Label" id="UoMId" defaultLabel="Unit of Measure (UoM)" />
+          </Bindings>
+          <Items name="loItemsUnitOfMeasureList" itemPattern="loItemsUnitOfMeasureList">
+            <ItemListLayout>
+              <Default>
+                <Col width="0.1em" layoutType="itemRight" bindingId="iconModReason" />
+                <Col flex="1">
+                  <Row layoutType="itemIdentifier" bindingId="uom" />
+                  <Row>
+                    <Col width="7em" layoutType="itemSecondary" bindingId="targetQuantityLabel" />
+                    <Col layoutType="itemSecondary" bindingId="targetQuantity" />
+                  </Row>
+                  <Row>
+                    <Col width="7em" layoutType="itemSecondary" bindingId="differenceLabel" />
+                    <Col layoutType="itemSecondary" bindingId="quantityDifferenceInformation" />
+                  </Row>
+                </Col>
+                <Col layoutType="itemRight" bindingId="quantity" />
+              </Default>
+            </ItemListLayout>
+            <Bindings>
+              <Binding target="description" type="Text" binding=".description1" bindingMode="ONE_WAY" />
+              <Binding target="uom" type="Text" binding=".uom" bindingMode="ONE_WAY" />
+              <Resource target="targetQuantityLabel" type="Label" id="TargetQuantityLabel" defaultLabel="Expected Qty: " bindingMode="ONE_WAY" />
+              <Binding target="targetQuantity" type="Text" binding=".targetQuantity" bindingMode="ONE_WAY" />
+              <Resource target="differenceLabel" type="Label" id="DifferenceLabel" defaultLabel="Difference: " bindingMode="ONE_WAY" />
+              <Binding target="quantityDifferenceInformation" type="Text" binding=".quantityDifferenceInformation" bindingMode="ONE_WAY" />
+              <Binding target="quantity" type="Stepper" binding=".quantity" minValue="0" maxValue="9999" bindingMode="TWO_WAY" formatV2="4.0" stepperCorrelationId=".pKey" />
+              <Binding target="iconModReason" type="Image" binding=".iconModReason" bindingMode="ONE_WAY" />
+            </Bindings>
+          </Items>
+        </EmbeddedList>
+        <GroupElement name="AdvancedSettingsGroup">
+          <Bindings>
+            <Resource target="Title" type="Label" id="AdvSettingsGroupId" defaultLabel="Quantity Difference (UoM)" />
+          </Bindings>
+          <!-- Reason -->
+          <SelectionBox name="ReasonCode" disabled="false">
+            <Bindings>
+              <Resource target="Label" type="Label" id="ReasonCodeLabel" defaultLabel="Reason Type" />
+              <Binding target="DataSource" toggleId="SdoModReason" bindingMode="TWO_WAY" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.LoItemsUnitOfMeasureList.Current.modificationReason" bindingMode="TWO_WAY" />
+            </Bindings>
+            <Items>
+              <Bindings>
+                <Binding target="ItemValue" type="Text" binding=".id" bindingMode="ONE_WAY" />
+                <Binding target="ItemText" type="Text" binding=".text" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+          </SelectionBox>
+        </GroupElement>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

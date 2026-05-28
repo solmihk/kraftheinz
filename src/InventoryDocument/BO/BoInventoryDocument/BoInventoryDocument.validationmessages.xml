@@ -1,0 +1,3 @@
+<ValidationMessages name="BoInventoryDocumentMessages" businessObject="BoInventoryDocument" schemaVersion="0.0.0.5">
+  <ValidationMessage name="ModificationReasonRequired" defaultMessage="Select a reason type for the highlighted checkout item." comment="Missing mandatory reason code for order item" />
+</ValidationMessages>

@@ -1,0 +1,23 @@
+<LookupObject name="LuTourData" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLuTourData" />
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" storable="true" dataSourceProperty="pKey" />
+    <SimpleProperty name="id" type="DomId" storable="true" dataSourceProperty="id" />
+    <SimpleProperty name="name" type="DomBpaName" storable="true" dataSourceProperty="name" />
+    <SimpleProperty name="dateFrom" type="DomDate" storable="true" dataSourceProperty="startDate" />
+    <SimpleProperty name="dateThru" type="DomDate" storable="true" dataSourceProperty="endDate" />
+    <SimpleProperty name="tmgMetaPKey" type="DomPKey" storable="true" dataSourceProperty="tourTemplateId" />
+    <SimpleProperty name="startEtpWarehousePKey" type="DomPKey" storable="true" dataSourceProperty="startWarehouseId" />
+    <SimpleProperty name="endEtpWarehousePKey" type="DomPKey" storable="true" dataSourceProperty="endWarehouseId" />
+    <SimpleProperty name="etpVehicleTruckPKey" type="DomPKey" storable="true" dataSourceProperty="truckId" />
+    <SimpleProperty name="defaultEtpVehicleTruckPKey" type="DomPKey" storable="true" dataSourceProperty="defaultEtpVehicleTruckPKey" />
+    <SimpleProperty name="considerMultipleWarehouses" type="DomPKey" storable="true" dataSourceProperty="considerMultipleWarehouses" />
+    <SimpleProperty name="driverName" type="DomUsrName" storable="true" dataSourceProperty="driverName" />
+    <SimpleProperty name="text" type="DomText" storable="false" dataSourceProperty="description" />
+  </SimpleProperties>
+  <Methods>
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="endOfDayAllowed" />
+  </Methods>
+</LookupObject>

@@ -1,0 +1,35 @@
+<Process name="Tour::FlyoutSelectCoDriverProcess" defaultAction="ShowFlyoutSelectCoDriverUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="UserList" type="LoUserOverview" />
+      </Declarations>
+      <Parameters>
+        <Input name="WarehouseId" type="DomPKey" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action actionType="LOAD" name="GetUserList" type="LoUsersByWarehouse">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::WarehouseId" />
+        </Parameters>
+        <Return name="ProcessContext::UserList" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowFlyoutSelectCoDriverUI">
+        <UIDescription>Tour::FlyoutSelectCoDriverUI</UIDescription>
+        <Events>
+          <Event name="itemSelected" action="AssignUserId" />
+        </Events>
+      </Action>
+      <Action actionType="END" name="AssignUserId">
+        <ReturnValues>
+          <Return name="userId" value="Event.pKey" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

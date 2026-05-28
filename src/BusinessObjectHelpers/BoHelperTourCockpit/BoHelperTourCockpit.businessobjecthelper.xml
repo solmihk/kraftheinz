@@ -1,0 +1,26 @@
+<BusinessObjectHelper name="BoHelperTourCockpit" schemaVersion="1.1">
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" />
+    <SimpleProperty name="CollapseState_CardTourMessage" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardTourSummary" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardTourWelcome" type="DomBool" />
+    <SimpleProperty name="cardTourWelcome_DateText" type="DomText" />
+    <SimpleProperty name="isTourUser" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardTourVisitsGuidance" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardTourStart" type="DomBool" />
+    <SimpleProperty name="CollapseState_CardTourEnd" type="DomBool" />
+  </SimpleProperties>
+  <Methods>
+    <Method name="beforeCreateAsync" />
+    <Method name="afterCreateAsync" />
+    <Method name="createAsync" />
+    <Method name="isCardVisible" />
+    <Method name="isCardCollapsible" />
+    <Method name="getDisplayedSubcomponentName" />
+    <Method name="isCardMaximizable" />
+    <Method name="getCockpitListCounter" />
+    <Method name="reduceNumberOfListItems" />
+    <Method name="canStartTourVisit"/>
+    <Method name="filterTourVisits"/>
+  </Methods>
+</BusinessObjectHelper>

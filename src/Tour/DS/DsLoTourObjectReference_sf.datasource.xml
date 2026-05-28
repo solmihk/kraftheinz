@@ -1,0 +1,30 @@
+<DataSource name="DsLoTourObjectReference" backendSystem="sf" businessObjectClass="LoTourObjectReference" external="false" editableEntity="Tour_Object_Reference__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Tour_Object_Reference__c" column="Id" />
+    <Attribute name="tourId" table="Tour_Object_Reference__c" column="Tour__c" />
+    <Attribute name="orderTemplateId" table="Tour_Object_Reference__c" column="Order_Template__c" />
+    <Attribute name="visitTemplateId" table="Tour_Object_Reference__c" column="Visit_Template__c" />
+    <Attribute name="usage" table="Tour_Object_Reference__c" column="Usage__c" />
+    <Attribute name="sysSignatureMetaPKey" table="Tour_Object_Reference__c" column="Signature_Template__c" />
+    <Attribute name="usedForStartOfDay" table="Tour_Object_Reference__c" column="Start_Of_Day__c" />
+    <Attribute name="usedForEndOfDay" table="Tour_Object_Reference__c" column="End_Of_Day__c" />
+    <Attribute name="prdCheckInPolicy" table="Order_Template__c" column="Product_Check_in_Policy__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour_Object_Reference__c" idAttribute="Id" />
+    <Entity name="Order_Template__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Tour_Object_Reference__c.Order_Template__c" comparator="eq" rightSideType="Attribute" rightSideValue="Order_Template__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+ Tour_Object_Reference__c.Tour__c = #tourId#
+    ]]></QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="tourId" type="TEXT" />
+  </Parameters>
+</DataSource>

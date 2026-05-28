@@ -1,0 +1,137 @@
+<BusinessObject name="BoInventoryDocument" schemaVersion="1.1">
+  <DataSource name="DsBoInventoryDocument"/>
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" dataSourceProperty="pKey"/>
+    <SimpleProperty name="name" type="DomString" dataSourceProperty="name"/>
+    <SimpleProperty name="phase" type="DomSdoPhase" dataSourceProperty="phase"/>
+    <SimpleProperty name="orderDate" type="DomDate" dataSourceProperty="orderDate"/>
+    <SimpleProperty name="warehouse" type="DomString" dataSourceProperty="warehouse"/>
+    <SimpleProperty name="warehouseId" type="DomPKey" dataSourceProperty="warehouseId"/>
+    <SimpleProperty name="tourStartWarehouseId" type="DomPKey" dataSourceProperty="tourStartWarehouseId"/>
+    <SimpleProperty name="tourEndWarehouseId" type="DomPKey" dataSourceProperty="tourEndWarehouseId"/>
+    <SimpleProperty name="documentType" type="DomSdoSubType" dataSourceProperty="documentType"/>
+    <SimpleProperty name="orderTemplateId" type="DomPKey" dataSourceProperty="orderTemplateId"/>
+    <SimpleProperty name="tourId" type="DomPKey" dataSourceProperty="tourId"/>
+    <SimpleProperty name="releaseTime" type="DomDateTime" dataSourceProperty="releaseTime"/>
+    <SimpleProperty name="storedSysReleasePKey" type="DomPKey"/>
+    <SimpleProperty name="orderId" type="DomId" dataSourceProperty="orderId"/>
+    <SimpleProperty name="releaseValidationDone" type="DomBool"/>
+    <SimpleProperty name="totalValue" type="DomMoney" dataSourceProperty="totalValue"/>
+    <SimpleProperty name="totalValueReceipt" type="DomMoney" dataSourceProperty="totalValueReceipt"/>
+    <SimpleProperty name="grossTotalValue" type="DomMoney" dataSourceProperty="grossTotalValue"/>
+    <SimpleProperty name="grossTotalValueReceipt" type="DomMoney" dataSourceProperty="grossTotalValueReceipt"/>
+    <SimpleProperty name="calculationStatus" type="DomSdoCalculationStatus" dataSourceProperty="calculationStatus"/>
+    <SimpleProperty name="actualStatePKey" type="DomSdoPhase" dataSourceProperty="actualStatePKey"/>
+    <SimpleProperty name="sf_mobilityRelease" type="DomBool" dataSourceProperty="sf_mobilityRelease"/>
+    <SimpleProperty name="responsiblePKey" type="DomPKey" dataSourceProperty="responsiblePKey"/>
+    <SimpleProperty name="ownerPKey" type="DomPKey" dataSourceProperty="ownerPKey"/>
+    <SimpleProperty name="nextStatePKey" type="DomPKey" dataSourceProperty="nextStatePKey"/>
+    <SimpleProperty name="truckId" type="DomPKey" dataSourceProperty="truckId"/>
+    <SimpleProperty name="orderAccountId" type="DomPKey" dataSourceProperty="orderAccountId"/>
+    <SimpleProperty name="inventoryReference1Id" type="DomPKey" dataSourceProperty="inventoryReference1Id"/>
+    <SimpleProperty name="inventoryReference2Id" type="DomPKey" dataSourceProperty="inventoryReference2Id"/>
+    <SimpleProperty name="inventoryReference3Id" type="DomPKey" dataSourceProperty="inventoryReference3Id"/>
+    <SimpleProperty name="inventoryReference4Id" type="DomPKey" dataSourceProperty="inventoryReference4Id"/>
+    <SimpleProperty name="inventoryReference5Id" type="DomPKey" dataSourceProperty="inventoryReference5Id"/>
+    <!-- used as title for UI page ... concat document type and name -->
+    <SimpleProperty name="description" type="DomString"/>
+    <SimpleProperty name="setPhaseInBeforeSave" type="DomBool"/>
+    <SimpleProperty name="validateForRelease" type="DomBool"/>
+    <SimpleProperty name="simplePricingCalculator" type="Object"/>
+    <SimpleProperty name="sysReleaseProcessStepsExists" type="DomBool"/>
+    <SimpleProperty name="releaseGeolocationLatitude" type="DomDecimal" dataSourceProperty="releaseGeolocationLatitude"/>
+    <SimpleProperty name="releaseGeolocationLongitude" type="DomDecimal" dataSourceProperty="releaseGeolocationLongitude"/>
+    <SimpleProperty name="wfeWorkflowPKey" type="DomPKey" dataSourceProperty="wfeWorkflowPKey"/>
+  </SimpleProperties>
+  <NestedObjects>
+    <NestedObject name="boOrderTemplate" objectClass="BoOrderMeta" dataSourceProperty="orderTemplateId" nestingProperty="pKey"/>
+    <NestedObject name="boWorkflow" objectClass="BoWorkflow" dataSourceProperty="wfeWorkflowPKey" nestingProperty="pKey"/>
+  </NestedObjects>
+  <ObjectLookups>
+    <ObjectLookup name="luResponsible" objectClass="LuUser" dataSourceProperty="responsiblePKey" lookupProperty="pKey"/>
+    <ObjectLookup name="luTourStartWarehouse" objectClass="LuTourWarehouse" dataSourceProperty="tourStartWarehouseId" lookupProperty="pKey"/>
+    <ObjectLookup name="luTourEndWarehouse" objectClass="LuTourWarehouse" dataSourceProperty="tourEndWarehouseId" lookupProperty="pKey"/>
+    </ObjectLookups>
+  <ListObjects>
+    <ListObject name="loItemsMainList" objectClass="LoInventoryDocumentItems" dataSourceProperty="pKey" listProperty="orderId" loadMode="OnDemand"/>
+    <ListObject name="loItemsUnitOfMeasureList" objectClass="LoInventoryDocumentItems" dataSourceProperty="pKey" listProperty="orderId" loadMode="OnDemand"/>
+    <ListObject name="loSysSignatureAttribute" objectClass="LoSysSignatureAttribute" dataSourceProperty="pKey" listProperty="referencePKey" loadMode="OnDemand"/>
+    <ListObject name="loSysSignatureBlob" objectClass="LoSysSignatureBlob" dataSourceProperty="empty" listProperty="empty" loadMode="OnDemand"/>
+    <ListObject name="loRecentState" objectClass="LoOrderRecentState" dataSourceProperty="pKey" listProperty="sdoMainPKey" loadMode="OnDemand"/>
+    <ListObject name="loInventories" objectClass="LoInventory" dataSourceProperty="empty" listProperty="empty" loadMode="OnDemand"/>
+    <ListObject name="loInventoryTransactions" objectClass="LoInventoryTransaction" dataSourceProperty="empty" listProperty="empty" loadMode="OnDemand"/>
+  </ListObjects>
+  <Methods>
+    <Method name="beforeSaveAsync"/>
+    <Method name="afterSaveAsync"/>
+    <Method name="beforeLoadAsync"/>
+    <Method name="afterLoadAsync"/>
+    <Method name="beforeInitialize"/>
+    <Method name="afterInitialize"/>
+    <Method name="beforeDoValidateAsync"/>
+    <Method name="afterDoValidateAsync"/>
+    <Method name="beforeCreateAsync"/>
+    <Method name="afterCreateAsync"/>
+    <Method name="loadAsync"/>
+    <Method name="saveAsync"/>
+    <Method name="createAsync"/>
+    <!-- Helpers -->
+    <Method name="setEARights"/>
+    <Method name="fillDescription"/>
+    <Method name="calculateItemDifference"/>
+    <!-- Display information handling -->
+    <Method name="createDisplayInformationForMainItemList"/>
+    <Method name="createDisplayInformationForUoMItem"/>
+    <Method name="createDisplayInformationForProduct"/>
+    <!-- UoM List handling -->
+    <Method name="fillUnitOfMeasureList"/>
+    <!-- Item changed handlers -->
+    <Method name="onInventoryDocumentItemChanged"/>
+    <!-- Price calculation -->
+    <Method name="calculateItemValue"/>
+    <Method name="calculateInventoryDocumentValue"/>
+    <!-- invalid item handling (modification reason required use case) -->
+    <Method name="isModReasonVisible"/>
+    <Method name="isModReasonRequired"/>
+    <Method name="markInvalidItem"/>
+    <Method name="markInvalidItems"/>
+    <Method name="processValidateReasonCode"/>
+    <!-- Button handling -->
+    <Method name="isAddProductVisible"/>
+    <Method name="isScanProductVisible"/>
+    <Method name="releaseButtonVisible"/>
+    <Method name="releaseButtonActive"/>
+    <Method name="isReleaseInformationVisible"/>
+    <Method name="isReleaseButtonVisible"/>
+    <!-- Adding Products + Scanning-->
+    <Method name="addProductCheckOutDocument"/>
+    <Method name="getMainOrderItemTemplate"/>
+    <Method name="getAvailableUoMForProduct"/>
+    <Method name="getDefaultUoMForProduct"/>
+    <Method name="validateScannedProduct"/>
+    <Method name="validateInvScannedItem"/>
+    <Method name="validateInvDocScannedUoM"/> 
+    <Method name="addScannedDocumentItems"/>
+    <!-- Release Handling -->
+    <Method name="release"/>
+    <Method name="determineSysReleaseProcessPKey"/>
+    <Method name="getReleaseTitle"/>
+    <Method name="storeSysReleaseProcessPKey"/>
+    <Method name="cancelRelease"/>
+    <!-- Inventory handlers -->
+    <Method name="processInventoryActions"/>
+    <Method name="setInventoryBalanceOfItem"/>
+    <Method name="setInventoryReferenceIds"/>
+    <!-- Order Item Loading -->
+    <Method name="loadInventoryDocumentItems"/>
+    <Method name="populateCheckOutItems"/>
+    <Method name="fetchCheckInItems"/>
+    <Method name="populateCheckInItems"/>
+    <Method name="getInventoryDocumentModificationReason"/>
+    <Method name="validateModificationReason"/>
+    <Method name="prepareItemsForSave"/>
+  </Methods>
+  <Validations>
+    <Validation name="validateInventory"/>
+  </Validations>
+</BusinessObject>

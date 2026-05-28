@@ -1,0 +1,36 @@
+<Process name="Tour::AddProductProcess" defaultAction="ShowAddProductUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="WarehouseProducts" type="LoWarehouseProducts"/>
+      </Declarations>
+      <Parameters>
+        <Input name="WarehouseId" type="DomPKey" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action actionType="LOAD" name="LoadWarehouseProducts" type="LoWarehouseProducts">
+        <Parameters>
+          <Input name="warehouseId" value="ProcessContext::WarehouseId" />
+          <Input name="asoName" type="Literal" value="AsoWarehouseProductForAdd" />
+        </Parameters>
+        <Return name="ProcessContext::WarehouseProducts" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowAddProductUI">
+        <UIDescription>Tour::AddProductUI</UIDescription>
+        <Events>
+          <Event name="itemSelected" action="EndAddProduct"/>
+        </Events>
+      </Action>
+      <Action actionType="END" name="EndAddProduct">
+        <ReturnValues>
+          <Return name="selectedProductId" value="Event.productId" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

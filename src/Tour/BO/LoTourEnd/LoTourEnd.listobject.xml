@@ -1,0 +1,14 @@
+<ListObject name="LoTourEnd" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLoTourEnd"/>
+  <Item objectClass="LiTourEnd"/>
+  <Methods>
+    <Method name="beforeSaveAsync"/>
+    <Method name="afterSaveAsync"/>
+    <Method name="afterLoadAsync"/>
+    <Method name="beforeLoadAsync"/>
+    <Method name="afterDoValidateAsync"/>
+    <Method name="beforeDoValidateAsync"/>
+    <Method name="getTourEndList"/>
+    <Method name="checkTasksEnabled"/>
+  <Method name="getPendingMandatoryActivities"/></Methods>
+</ListObject>

@@ -1,0 +1,32 @@
+<Process name="Tour::TourOverviewProcess" defaultAction="LoadTourOverviewList" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="TourOverviewList" type="LoTourOverview" />
+      </Declarations>
+      <Parameters/>
+    </ProcessContext>
+    <EntryActions>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="LoadTourOverviewList" actionType="LOAD" type="LoTourOverview" >
+        <Return name="ProcessContext::TourOverviewList" />
+        <TransitionTo action="ShowTourOverviewUI" />
+    </Action>
+      <Action actionType="VIEW" name="ShowTourOverviewUI">
+        <UIDescription>Tour::TourOverviewUI</UIDescription>
+        <Events>
+          <Event name="itemSelected" action="TourDetail" />
+        </Events>
+      </Action>
+      <Action name="TourDetail" actionType="PROCESS" process="Tour::TourCockpitProcess">
+        <Parameters>
+          <Input name="TourPKey" value="Event.pKey" />
+        </Parameters>
+        <TransitionTo action="LoadTourOverviewList" />
+      </Action>
+    </Actions>
+  </Body>
+</Process>

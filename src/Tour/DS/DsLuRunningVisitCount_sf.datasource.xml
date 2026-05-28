@@ -1,0 +1,16 @@
+<DataSource name="DsLuRunningVisitCount" backendSystem="sf" businessObjectClass="LuRunningVisitCount" external="false" editableEntity="Visit" schemaVersion="2.0">
+  <Attributes>
+    <DerivedAttribute name="runningVisitCount" value="Count(*)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Visit" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+     Visit.Status = 'InProgress'
+     AND Visit.Responsible__c = '#UserPKey#' 
+  ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters />
+</DataSource>

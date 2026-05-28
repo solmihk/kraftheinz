@@ -1,0 +1,171 @@
+<Process name="Call::LoadCallProcess" defaultAction="IsDSD_Decision" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="CallBO" type="BoCall" />
+        <Declaration name="TimeCardAvailable" type="String" />
+      </Declarations>
+      <Parameters>
+        <Input name="CallPKey" type="String" />
+        <Input name="ResponsiblePKey" type="DomPKey" />
+        <Input name="ActionName" type="String" />
+        <Input name="IsCallFromDSD" type="DomBool" />
+        <Input name="CanStartVisit" type="DomBool" />
+        <Input name="ShowStartVisitInfo" type="DomBool" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="LoadCallBO" actionType="LOAD" type="BoCall">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::CallPKey" />
+          <Input name="referenceUserPKey" value="ProcessContext::ResponsiblePKey" />
+          <Input name="isCallFromDSD" value="ProcessContext::IsCallFromDSD" />
+        </Parameters>
+        <Return name="ProcessContext::CallBO" />
+      </Action>
+      <Action name="SetConfiguration" actionType="LOGIC" call="ProcessContext::CallBO.captureProceedingTime">
+        <Parameters>
+          <Input name="CallComplete" value="false" type="Literal"  />
+          <Input name="isDSDMode" value="ProcessContext::IsCallFromDSD" />
+        </Parameters>
+      </Action>
+      <Action name="CheckLoadOnDemand" actionType="LOGIC" call="ProcessContext::CallBO.loadOnDemand">
+        <Parameters>
+          <Input name="object" value="Attachments" type="Literal" />
+        </Parameters>
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="IsDSD_Decision" actionType="DECISION" parameter="ProcessContext::isCallFromDSD">
+        <Case value="true" action="DSDActionDecision" />
+        <CaseElse action="CheckActionName" />
+      </Action>
+      <Action name="CheckActionName" actionType="DECISION" parameter="ProcessContext::ActionName">
+        <Case value="Start" action="DSDActionDecision" />
+        <CaseElse action="ShouldShowStartVisitInfo" />
+      </Action>
+      <Action actionType="LOGIC" name="ShouldShowStartVisitInfo" call="ProcessContext::CallBO.showStartVisitInfo">
+        <Return name="ProcessContext::ShowStartVisitInfo" />
+        <TransitionTo action="ShowStartVisitInfoDecision" />
+      </Action>
+      <Action name="ShowStartVisitInfoDecision" actionType="DECISION" parameter="ProcessContext::showStartVisitInfo">
+        <Case value="true" action="ShowStartVisitInfo" />
+        <CaseElse action="DSDActionDecision" />
+      </Action>
+      <Action name="ShowStartVisitInfo" actionType="CONFIRM" confirmType="Ok">
+        <Message messageId="StartVisitInfoMessage" />
+        <Cases>
+          <Case value="Ok" action="DSDActionDecision" />
+        </Cases>
+      </Action>
+      <Action name="DSDActionDecision" actionType="DECISION" parameter="ProcessContext::ActionName">
+        <Case value="Start" action="ProcessValidationInProgressAction" />
+        <CaseElse action="CheckIfTimeCardIsAvailable" />
+      </Action>
+      <Action name="ProcessValidationInProgressAction" actionType="LOGIC" call="ProcessContext::CallBO.checkForInProgressVisit">
+        <Return name="ProcessContext::ValidationInProgressResult" />
+        <TransitionTo action="ValidateInProgressBeforeStart_Decision" />
+      </Action>
+      <Action name="ValidateInProgressBeforeStart_Decision" actionType="DECISION" parameter="ProcessContext::ValidationInProgressResult">
+        <Case value="false" action="ProcessValidationGeoLocationAction" />
+        <CaseElse action="CheckIfTimeCardIsAvailable" />
+      </Action>
+      <Action name="ProcessValidationGeoLocationAction" actionType="LOGIC" call="ProcessContext::CallBO.validGeoLocationVisit">
+        <Return name="ProcessContext::ValidationLocationResult" />
+        <TransitionTo action="ValidateLocationBeforeStart_Decision" />
+      </Action>
+      <Action name="ValidateLocationBeforeStart_Decision" actionType="DECISION" parameter="ProcessContext::ValidationLocationResult">
+        <Case value="valid" action="ProcessStartAction" />
+        <CaseElse action="SetCanStartVisitButton" />
+      </Action>
+      <Action actionType="LOGIC" name="SetCanStartVisitButton" call="Utils.identity">
+        <Return name="ProcessContext::CanStartVisit" />
+        <Parameters>
+          <Input name="value" value="true" type="Literal" />
+        </Parameters>
+        <TransitionTo action="CheckIfTimeCardIsAvailable" />
+      </Action>
+      <Action name="ProcessStartAction" actionType="LOGIC" call="ProcessContext::CallBO.ProcessStartAction">
+        <Parameters>
+          <Input name="isCallFromDSD" value="ProcessContext::isCallFromDSD" />
+        </Parameters>
+        <TransitionTo action="CheckIfTimeCardIsAvailable" />
+      </Action>
+      <Action actionType="LOGIC" name="CheckIfTimeCardIsAvailable" call="Utils.isDefined">
+        <Parameters>
+          <Input name="timeCard" value="ProcessContext::CallBO.boUserDailyReport" />
+        </Parameters>
+        <Return name="ProcessContext::TimeCardAvailable" />
+        <TransitionTo action="TimeCard_SaveDecision" />
+      </Action>
+      <Action name="TimeCard_SaveDecision" actionType="DECISION" parameter="ProcessContext::TimeCardAvailable">
+        <Case value="true" action="PrepareTimeCardForSave" />
+        <CaseElse action="IsCallDirty" />
+      </Action>
+      <!-- Save Call if dirty (e.g. because of captureProceedingTime). Otherwise "Unsaved Changes" message is popping up if app is swipted to background  -->
+      <Action actionType="DECISION" name="IsCallDirty" parameter="ProcessContext::CallBO.objectStatus">
+        <Case value="1" action="DSD_Navigation_Decision" />
+        <CaseElse action="SaveBoCall" />
+      </Action>
+      <Action name="SaveBoCall" actionType="SAVE" >
+        <TransitionTo action="DSD_Navigation_Decision" />
+      </Action>
+      <Action name="DSD_Navigation_Decision" actionType="DECISION" parameter="ProcessContext::IsCallFromDSD">
+        <Case value="true" action="StartDSDNavigation_Decision" />
+        <CaseElse action="Navigation_Decision" />
+      </Action>
+      <Action name="Navigation_Decision" actionType="DECISION" parameter="ProcessContext::CallBO.luCallMeta.mobilityUserGuidance">
+        <Case value="Sales" action="StartNavigationStoreCockpit" />
+        <Case value="Merchandizing" action="StartNavigationStoreCockpit" />
+        <Case value="Delivery" action="StartNavigationProcess" />
+        <Case value="NonCustomer" action="StartNavigationProcess" />
+        <CaseElse action="StartNavigationProcess" />
+      </Action>
+      <Action name="StartDSDNavigation_Decision" actionType="DECISION" parameter="ProcessContext::CallBO.luCallMeta.mobilityUserGuidance">   
+        <Case value="Delivery" action="OpenDSDDeliveyCockpit" />
+        <CaseElse action="OpenDSDDeliveyCockpit" />
+      </Action>
+      <Action actionType="PROCESS" name="StartNavigationStoreCockpit" process="Call::StoreCockpitTabProcess">
+        <Parameters>
+          <Input name="MainBO" value="ProcessContext::CallBO" />
+          <Input name="CustomerPKey" value="ProcessContext::CallBO.bpaMainPKey" />
+          <Input name="CurrentCustomerPKey" value="ProcessContext::CallBO.BpaMainPKey" />
+          <Input name="CurrentCustomerName" value="ProcessContext::CallBO.luCustomer.name" />
+          <Input name="CallDate" value="ProcessContext::CallBO.DateFrom" />
+          <Input name="LeadTime" value="ProcessContext::CallBO.LuCallMeta.PrmFindingLeadTime" />
+          <Input name="MobilityUserGuidance" value="ProcessContext::CallBO.luCallMeta.mobilityUserGuidance" />
+          <Input name="CallDateThru" value="ProcessContext::CallBO.DateThru" />
+        </Parameters>
+      </Action>
+      <Action name="OpenDSDDeliveyCockpit" actionType="PROCESS" process="TourVisit::DeliveryCockpitProcess">
+        <Parameters>
+          <Input name="VisitBO" value="ProcessContext::CallBO" />
+          <Input name="CanStartVisit" value="ProcessContext::CanStartVisit" />
+        </Parameters>
+      </Action>
+      <Action actionType="PROCESS" name="StartNavigationProcess" process="Call::NavigationProcess">
+        <Parameters>
+          <Input name="CallBO" value="ProcessContext::CallBO" />
+        </Parameters>
+      </Action>
+      <Action actionType="LOGIC" name="PrepareTimeCardForSave" call="ProcessContext::CallBO.setCloseTimeEntry">
+        <Parameters>
+          <Input name="closeTE" value="0" type="Literal" />
+        </Parameters>
+        <TransitionTo action="SaveTimeCard" />
+      </Action>
+      <Action name="SaveTimeCard" actionType="SAVE">
+        <Parameters></Parameters>
+        <TransitionTo action="ResetTESaveFlag" />
+      </Action>
+      <Action actionType="LOGIC" name="ResetTESaveFlag" call="ProcessContext::CallBO.setCloseTimeEntry">
+        <Parameters>
+          <Input name="closeTE" value="1" type="Literal" />
+        </Parameters>
+        <TransitionTo action="IsCallDirty" />
+      </Action>
+    </Actions>
+  </Body>
+</Process>

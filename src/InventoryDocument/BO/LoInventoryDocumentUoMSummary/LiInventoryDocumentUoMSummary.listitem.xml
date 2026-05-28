@@ -1,0 +1,12 @@
+<ListItem name="LiInventoryDocumentUoMSummary">
+  <SimpleProperties>
+    <SimpleProperty id="true" name="pKey" type="DomPKey" storable="false" />
+    <SimpleProperty name="uom" type="DomPrdLogisticUnit" storable="false" />
+    <SimpleProperty name="orderItemTemplateId" type="DomPKey" storable="false" />
+    <SimpleProperty name="orderItemTemplateText" type="DomText" storable="false" />
+    <SimpleProperty name="expectedUnits" type="DomInteger" storable="false" />
+    <SimpleProperty name="actualUnits" type="DomInteger" storable="false" />
+    <SimpleProperty name="leftQuantity" type="DomInteger" storable="false" />
+    <SimpleProperty name="differenceUnits" type="DomInteger" storable="false" />
+  </SimpleProperties>
+</ListItem>

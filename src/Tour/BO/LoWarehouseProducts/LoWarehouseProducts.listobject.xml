@@ -1,0 +1,23 @@
+<ListObject name="LoWarehouseProducts" generateLoadMethod="false" schemaVersion="1.1">
+  <DataSource name="DsLoWarehouseProducts" />
+  <Item objectClass="LiWarehouseProducts" />
+  <Methods>
+    <Method name="beforeSaveAsync" />
+    <Method name="afterSaveAsync" />
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="afterDoValidateAsync" />
+    <Method name="beforeDoValidateAsync" />
+  </Methods>
+  <AdvancedSearchObjects>
+    <AdvancedSearchObject name="AsoWarehouseProductForAdd">
+      <AdvancedSearchAttributes profileId="default">
+        <AdvancedSearchAttribute label="WarehouseProductForSearch_consumerGoodsProductCodeId" property="consumerGoodsProductCodeId" type="Text" />
+        <AdvancedSearchAttribute label="WarehouseProductForSearch_description1" property="productDescription1" type="Text" />
+        <AdvancedSearchAttribute label="WarehouseProductForSearchh_gtin" property="gtin" type="Text" />
+        <AdvancedSearchAttribute label="WarehouseProductForSearch_productType" property="productType" toggleId="PrdType" type="Selection" />
+        <AdvancedSearchAttribute label="WarehouseProductForSearch_category" property="category" toggleId="PrdCategory" type="Selection" />
+      </AdvancedSearchAttributes>
+    </AdvancedSearchObject>
+  </AdvancedSearchObjects>
+</ListObject>

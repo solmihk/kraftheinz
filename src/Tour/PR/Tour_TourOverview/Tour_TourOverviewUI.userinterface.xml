@@ -1,0 +1,59 @@
+<UIDescription name="Tour::TourOverviewUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionPage" cachable="false">
+    <PageHeader>
+      <Bindings>
+        <Resource target="title" type="Label" id="TourOverviewId" defaultLabel="Tours" />
+      </Bindings>
+    </PageHeader>
+    <HeaderLine name="Header">
+    </HeaderLine>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Area areaName="mainArea" areaPattern="SingleElementArea">
+  			<GroupedList name="toursList" dataSource="ProcessContext::TourOverviewList.items[]" searchBarPlacement="HeaderLine" searchable="true">
+          <Items name="Items" itemPattern="DSDTourOverviewItem">
+            <ItemListLayout>
+              <Default>
+                <Col width="7.25em">
+                  <Row layoutType="itemIdentifier" bindingId="Description" />
+                  <Row layoutType="itemSecondary" bindingId="StartDate" />
+                </Col>
+                <Col width="4.5em">
+                  <Row>
+                    <Col layoutType="itemSecondary" bindingId="VisitCount" />
+                    <Col layoutType="itemSecondary" bindingId="tourScheduleVisitsCount" />
+                  </Row>
+                </Col>
+                <Col width="7.25em">
+                  <Row>
+                    <Col layoutType="Image" bindingId="StatusIcon" />
+                    <Col width="0.5em" layoutType="itemSecondary" bindingId="Space" />
+                    <Col layoutType="itemNameSecondary" bindingId="TourStatus" />
+                  </Row>
+                </Col>
+              </Default>
+            </ItemListLayout>
+            <Bindings>
+              <Binding target="Description" type="Text" binding=".description" bindingMode="ONE_WAY" />
+              <Binding target="StartDate" type="Date" binding=".startDate" bindingMode="ONE_WAY" />
+              <Binding target="VisitCount" type="Text" binding=".visitCount" bindingMode="ONE_WAY" />
+              <Binding target="TourStatus" type="Text" binding=".tourOverviewStatus" bindingMode="ONE_WAY" />
+              <Resource target="Space" type="Label" id="noId" defaultLabel=" " />
+              <Binding target="StatusIcon" type="Image" binding=".statusIcon" bindingMode="ONE_WAY" />
+              <Resource target="tourScheduleVisitsCount" type="Label" id="TourOverviewVisitsCount" defaultLabel="Visits" />
+            </Bindings>
+          </Items>
+          <Events>
+            <ItemSelectedEvent event="itemSelected">
+              <Params>
+                <Param name="pKey" value=".pKey" />
+              </Params>
+            </ItemSelectedEvent>
+          </Events>
+          <SearchAttributes>
+            <SearchAttribute name="TourName" />
+          </SearchAttributes>
+        </GroupedList>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

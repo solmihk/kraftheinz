@@ -1,0 +1,43 @@
+<DataSource name="DsLoTourDocuments" backendSystem="sf" businessObjectClass="LoTourDocuments" external="false" editableEntity="Order__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Order__c" column="Id" />
+    <Attribute name="name" table="Order__c" column="Name"/>
+    <Attribute name="orderId" table="Order__c" column="Order_Id__c" />
+    <Attribute name="orderDate" table="Order__c" column="Order_Date__c"/>
+    <Attribute name="phase" table="Order__c" column="Phase__c"/>
+    <Attribute name="documentType" table="Order_Template__c" column="Document_Type__c"/>
+    <Attribute name="orderTemplateId" table="Order_Template__c" column="Id"/>
+    <DerivedAttribute name="phaseIcon" value="CASE WHEN Order__c.Phase__c = 'Released' THEN 'DocumentStatus_Completed' WHEN Order__c.Phase__c = 'Canceled' THEN 'DocumentStatus_Canceled' WHEN Order__c.Phase__c = 'Initial' THEN 'DocumentStatus_Open'  END"/>
+   </Attributes>
+  <Entities>
+    <Entity name="Order__c" alias="" idAttribute="Id" />
+    <Entity name="Order_Template__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Order_Template__c.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Order__c.Order_Template__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="RecordType" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Order_Template__c.RecordTypeId" comparator="eq" rightSideType="Attribute" rightSideValue="RecordType.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+    Order_Template__c.Document_Type__c IN ('ProductCheckOut', 'ProductCheckIn')
+    AND RecordType.DeveloperName='Truck_Load'
+    AND Order__c.Tour__c='#tourId#'
+    AND Order__c.Responsible__c='#UserPKey#'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="Order__c" attribute="Order_Date__c" direction="ASC" />
+    <OrderCriterion entity="Order__c" attribute="Name" direction="ASC" />
+  </OrderCriteria>
+  <Parameters >
+    <Parameter name="tourId" type="TEXT" />
+  </Parameters>
+</DataSource>

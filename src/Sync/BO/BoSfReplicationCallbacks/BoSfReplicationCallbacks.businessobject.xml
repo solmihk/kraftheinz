@@ -1,0 +1,55 @@
+<BusinessObject name="BoSfReplicationCallbacks" schemaVersion="1.1" generateLoadMethod="false" baseClass="FrameworkSfReplicationCallbacks">
+  <DataSource name="DsBoSfReplicationCallbacks"/>
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey"/>
+  </SimpleProperties>
+  <ObjectLookups/>
+  <NestedObjects/>
+  <ListObjects/>
+  <Methods>
+    <Method name="beforeSaveAsync"/>
+    <Method name="afterSaveAsync"/>
+    <Method name="beforeLoadAsync"/>
+    <Method name="afterLoadAsync"/>
+    <Method name="beforeInitialize"/>
+    <Method name="afterInitialize"/>
+    <Method name="beforeDoValidateAsync"/>
+    <Method name="afterDoValidateAsync"/>
+    <Method name="beforeCreateAsync"/>
+    <Method name="afterCreateAsync"/>
+    <!-- Called By Framework-->
+    <Method name="requestOnDemandDataAsync"/>
+    <Method name="cleanUpOnDemandDataAsync"/>
+    <!-- Data Available Checks-->
+    <Method name="isCallOnDemandDataAvailable"/>
+    <Method name="isOrderOnDemandDataAvailable"/>
+    <Method name="isSalesFolderOnDemandDataAvailable"/>
+    <Method name="isPromotionOnDemandDataAvailable"/>
+    <Method name="isDSDOrderOnDemandDataAvailable"/>
+    <!-- Add NFTs to Requests-->
+    <Method name="addOrderNftsToRequest"/>
+    <Method name="addDSDOrderNFTsToRequest"/>
+    <Method name="addCallNftsToRequest"/>
+    <Method name="addPromotionNftsToRequest"/>
+    <!-- Request Data -->
+    <Method name="executeRequestsAsync"/>
+    <Method name="requestCallOnDemandDataAsync"/>
+    <Method name="requestOrderOnDemandDataAsync"/>
+    <Method name="requestPromotionOnDemandDataAsync"/>
+    <Method name="requestMandatoryAttachmentDataAsync"/>
+    <Method name="requestDSDOrderOnDemandDataAsync"/>
+    <!-- Helpers -->
+    <Method name="removeLocalIDs"/>
+    <Method name="isLocalID"/>
+    <Method name="evaluateAvailabilityResult"/>
+    <Method name="getPropertyValuesFromArray"/>
+    <Method name="getWorkingDays"/>
+    <Method name="getNextOrPreviousWorkday"/>
+    <Method name="checkIfRunningInDSDMode"/>
+    <Method name="getCurrentUserRoles"/>
+    <Method name="addDSDVisitNftsToRequest"/>
+    <Method name="isDSDVisitOnDemandDataAvailable"/>
+    <Method name="requestDSDVisitOnDemandDataAsync"/>
+  </Methods>
+  <Validations/>
+</BusinessObject>

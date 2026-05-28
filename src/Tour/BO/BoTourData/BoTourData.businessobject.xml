@@ -1,0 +1,92 @@
+<BusinessObject name="BoTourData" schemaVersion="1.1">
+  <DataSource name="DsBoTourData"/>
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" dataSourceProperty="pKey"/>
+    <SimpleProperty name="tourName" type="DomText" dataSourceProperty="tourName"/>
+    <SimpleProperty name="tourTemplateId" type="DomPKey" dataSourceProperty="tourTemplateId"/>
+    <SimpleProperty name="startDate" type="DomDate" dataSourceProperty="startDate"/>
+    <SimpleProperty name="tourStatus" type="DomTmgStatus" dataSourceProperty="tourStatus"/>
+    <SimpleProperty name="tourOrigStatus" type="DomTmgStatus"/>
+    <SimpleProperty name="statusIcon" type="DomString" dataSourceProperty="statusIcon"/>
+    <SimpleProperty name="startWarehouseId" type="DomPKey" dataSourceProperty="startWarehouseId"/>
+    <SimpleProperty name="startWarehouseName" type="DomString" dataSourceProperty="startWarehouseName"/>
+    <SimpleProperty name="truckId" type="DomPKey" dataSourceProperty="truckId"/>
+    <SimpleProperty name="trailer1Id" type="DomPKey" dataSourceProperty="trailer1Id"/>
+    <SimpleProperty name="trailer2Id" type="DomPKey" dataSourceProperty="trailer2Id"/>
+    <SimpleProperty name="odometerStart" type="DomString" dataSourceProperty="odometerStart"/>
+    <SimpleProperty name="odometerEnd" type="DomString" dataSourceProperty="odometerEnd"/>
+    <SimpleProperty name="vehicleOkStart" type="DomBool" dataSourceProperty="vehicleOkStart"/>
+    <SimpleProperty name="vehicleStatusStart" type="DomTmgVehicleStatus" dataSourceProperty="vehicleStatusStart"/>
+    <SimpleProperty name="vehicleOkEnd" type="DomBool" dataSourceProperty="vehicleOkEnd"/>
+    <SimpleProperty name="vehicleStatusEnd" type="DomTmgVehicleStatus" dataSourceProperty="vehicleStatusEnd"/>
+    <SimpleProperty name="tourDescription" type="DomString" dataSourceProperty="tourDescription"/>
+    <SimpleProperty name="startTime" type="DomTime" dataSourceProperty="startTime"/>
+    <SimpleProperty name="endDate" type="DomDate" dataSourceProperty="endDate"/>
+    <SimpleProperty name="endTime" type="DomTime" dataSourceProperty="endTime"/>
+    <SimpleProperty name="actualStartDate" type="DomDate" dataSourceProperty="actualStartDate"/>
+    <SimpleProperty name="actualStartTime" type="DomTime" dataSourceProperty="actualStartTime"/>
+    <SimpleProperty name="actualEndDate" type="DomDate" dataSourceProperty="actualEndDate"/>
+    <SimpleProperty name="actualEndTime" type="DomTime" dataSourceProperty="actualEndTime"/>
+    <SimpleProperty name="endWarehouseId" type="DomPKey" dataSourceProperty="endWarehouseId"/>
+    <SimpleProperty name="coDriverUserId" type="DomPKey" dataSourceProperty="coDriverUserId"/>
+    <SimpleProperty name="vehicleDetailsReviewed" type="DomBool" dataSourceProperty="vehicleDetailsReviewed"/>
+    <SimpleProperty name="endTourVehicleDetailsReviewed" type="DomBool" dataSourceProperty="endTourVehicleDetailsReviewed"/>
+    <SimpleProperty name="shouldAllowStartDayTimeTracking" type="DomBool" dataSourceProperty="shouldAllowStartDayTimeTracking"/>
+    <SimpleProperty name="shouldAllowEndDayTimeTracking" type="DomBool" dataSourceProperty="shouldAllowEndDayTimeTracking"/>
+    <SimpleProperty name="considerMileage" type="DomTmgConsiderMileage" dataSourceProperty="considerMileage"/>
+    <SimpleProperty name="considerVehicle" type="DomTmgConsiderVehicle" dataSourceProperty="considerVehicle"/>
+    <SimpleProperty name="considerVehicleStatus" type="DomTmgConsiderVehicleStatus" dataSourceProperty="considerVehicleStatus"/>
+    <SimpleProperty name="startTourActivitiesCompleted" type="DomBool" dataSourceProperty="startTourActivitiesCompleted"/>
+    <SimpleProperty name="originalStartTourActivitiesCompleted" type="DomBool"/>
+    <SimpleProperty name="startWarehouseDescription" type="DomString" dataSourceProperty="startWarehouseDescription"/>
+  </SimpleProperties>
+  <NestedObjects/>
+  <ObjectLookups>
+    <ObjectLookup name="luStartWarehouse" objectClass="LuTourWarehouse" dataSourceProperty="startWarehouseId" lookupProperty="pKey"/>
+    <ObjectLookup name="luEndWarehouse" objectClass="LuTourWarehouse" dataSourceProperty="endWarehouseId" lookupProperty="pKey"/>
+    <ObjectLookup name="luCoDriver" objectClass="LuUser" dataSourceProperty="coDriverUserId" lookupProperty="pKey"/>
+    <ObjectLookup name="luTemplate" objectClass="LuTourTemplateData" dataSourceProperty="tourTemplateId" lookupProperty="pKey"/>
+    <ObjectLookup name="luTruck" objectClass="LuTourVehicle" dataSourceProperty="truckId" lookupProperty="pKey"/>
+    <ObjectLookup name="luTrailer1" objectClass="LuTourVehicle" dataSourceProperty="trailer1Id" lookupProperty="pKey"/>
+    <ObjectLookup name="luTrailer2" objectClass="LuTourVehicle" dataSourceProperty="trailer2Id" lookupProperty="pKey"/>
+  </ObjectLookups>
+  <ListObjects>
+    <ListObject name="loTourDocuments" objectClass="LoTourDocuments" dataSourceProperty="pKey" listProperty="tourId" loadMode="OnDemand"/>
+    <ListObject name="vehicleInspectionTourCheckList" objectClass="LoTourTourCheck" dataSourceProperty="pKey" listProperty="tourId" loadMode="OnDemand"/>
+    <ListObject name="safetyInspectionTourCheckList" objectClass="LoTourTourCheck" dataSourceProperty="pKey" listProperty="tourId" loadMode="OnDemand"/>
+  </ListObjects>
+  <Methods>
+    <Method name="beforeSaveAsync"/>
+    <Method name="afterSaveAsync"/>
+    <Method name="beforeLoadAsync"/>
+    <Method name="afterLoadAsync"/>
+    <Method name="beforeInitialize"/>
+    <Method name="afterInitialize"/>
+    <Method name="beforeDoValidateAsync"/>
+    <Method name="afterDoValidateAsync"/>
+    <Method name="beforeCreateAsync"/>
+    <Method name="afterCreateAsync"/>
+    <Method name="loadAsync"/>
+    <Method name="saveAsync"/>
+    <Method name="createAsync"/>
+    <Method name="canStartTour"/>
+    <Method name="setEARights"/>
+    <Method name="afterStartWarehouseSelect"/>
+    <Method name="startTour"/>
+    <Method name="updateTourStartDate"/>
+    <Method name="endTour"/>
+    <Method name="canEndTour"/>
+    <Method name="isMandatoryCheckinCompleted"/>
+    <Method name="loadTourDocumentsOnDemand"/>
+    <Method name="mergeProperties"/>
+    <Method name="checkButtonVisibility"/>
+    <Method name="checkIfRunningInHybridMode"/>
+    <Method name="sortInspectionItems"/>
+  </Methods>
+  <Validations>
+    <Validation name="validateTourDate"/>
+    <Validation name="validateWarehouseAndDriver"/>
+    <Validation name="validateVehicleDetails"/>
+    <Validation name="validateVehicleDetailEnd"/>
+  </Validations>
+</BusinessObject>

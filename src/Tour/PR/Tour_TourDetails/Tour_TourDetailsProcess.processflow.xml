@@ -1,0 +1,296 @@
+<Process name="Tour::TourDetailsProcess" defaultAction="ShowTourDetailsUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="TourDataBo" type="BoTourData" />
+        <Declaration name="CurrentTabName" type="String" />
+        <Declaration name="SelectedStartWarehouseId" type="DomPKey" />
+        <Declaration name="SelectedEndWarehouseId" type="DomPKey" />
+        <Declaration name="CoDriverUserId" type="DomPKey" />
+        <Declaration name="SelectedTruckId" type="DomPKey" />
+        <Declaration name="SelectedTrailer1Id" type="DomPKey" />
+        <Declaration name="SelectedTrailer2Id" type="DomPKey" />
+        <Declaration name="VehicleTypes" type="String" />
+      </Declarations>
+      <Parameters>
+        <Input name="TourId" type="DomPKey" />
+        <Input name="InitialTabName" type="String" />
+        <Input name="InvokedFrom" type="String" />
+        <Input name="TourVisitsList" type="LoTourVisits" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="LoadBo" actionType="LOAD" type="BoTourData">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo" />
+      </Action>
+      <!-- Making BO dirty is needed because 'vehicleDetailsReviewed' is set in a validation -->
+      <!-- Odometer Start is prepopulated ... if user is just taking it over without any modification validation is not triggered -->
+      <Action name="MakeBoDirty" actionType="LOGIC" call="ProcessContext::TourDataBo.setObjectStatus">
+        <Parameters>
+          <Input name="objectStatus" value="5" />
+        </Parameters>
+      </Action>
+      <Action name="InitCurrentTab" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::CurrentTabPage" />
+        <Parameters>
+          <Input name="value" value="ProcessContext::InitialTabName" />
+        </Parameters>
+      </Action>
+      <Action name="SetEARights" actionType="LOGIC" call="ProcessContext::TourDataBo.setEARights">
+        <Parameters>
+          <Input name="invokedFrom" value="ProcessContext::InvokedFrom" />
+          <Input name="visitsList" value="ProcessContext::TourVisitsList" />
+        </Parameters>
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowTourDetailsUI">
+        <UIDescription>Tour::TourDetailsUI</UIDescription>
+        <Events>
+          <Event name="tabSelected" action="SetCurrentTab" />
+          <Event name="startWarehouseLookup" action="ShowStartWarehouseLookup" />
+          <Event name="endWarehouseLookup" action="ShowEndWarehouseLookup" />
+          <Event name="coDriverLookup" action="ShowCoDriverLookup" />
+          <Event name="truckLookup" action="LoadTruckVehicleTypes" />
+          <Event name="trailer1Lookup" action="LoadTrailer1VehicleTypes" />
+          <Event name="trailer2Lookup" action="LoadTrailer2VehicleTypes" />
+          <Event name="startTour" action="StartTour" />
+        </Events>
+      </Action>
+      <!-- Decision Point for selected Tab Pages -->
+      <Action name="SetCurrentTab" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="tabName" value="Event.tabName" />
+        </Parameters>
+        <Return name="ProcessContext::CurrentTabName" />
+        <!-- <TransitionTo action="HandleVehicleInspectionStart" /> -->
+      </Action>
+      
+      <!-- Filter vehicle inspection items for start of day -->
+      <!-- <Action name="HandleVehicleInspectionStart" actionType="LOGIC" call="ProcessContext::TourDataBo.sortInspectionItems">
+        <Parameters>
+          <Input name="inspectionType" value="Event.tabName" />
+        </Parameters>
+      </Action> -->
+          
+      <!-- Start Warehouse-Lookup & Selection -->
+      <Action actionType="PROCESS" name="ShowStartWarehouseLookup" process="Tour::FlyoutSelectWarehouseProcess">
+        <ReturnValues>
+          <Return name="ProcessContext::SelectedStartWarehouseId" value="warehouseId" />
+        </ReturnValues>
+        <TransitionTo action="StartWarehouseSelected" />
+      </Action>
+      <Action name="StartWarehouseSelected" actionType="DECISION" parameter="ProcessContext::SelectedStartWarehouseId">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <CaseElse action="SetStartWarehouseId" />
+      </Action>
+      <Action actionType="LOGIC" name="SetStartWarehouseId" call="ProcessContext::TourDataBo.setStartWarehouseId">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::SelectedStartWarehouseId" />
+        </Parameters>
+        <TransitionTo action="LoadStartWarehouseLookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadStartWarehouseLookup" type="LuTourWarehouse">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.startWarehouseId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luStartWarehouse" />
+        <TransitionTo action="AfterStartWarehouseSelect" />
+      </Action>
+      <Action actionType="LOGIC" name="AfterStartWarehouseSelect" call="ProcessContext::TourDataBo.afterStartWarehouseSelect" />
+      <!-- End Warehouse-Lookup & Selection -->
+      <Action actionType="PROCESS" name="ShowEndWarehouseLookup" process="Tour::FlyoutSelectWarehouseProcess">
+        <ReturnValues>
+          <Return name="ProcessContext::SelectedEndWarehouseId" value="warehouseId" />
+        </ReturnValues>
+        <TransitionTo action="EndWarehouseSelected" />
+      </Action>
+      <Action name="EndWarehouseSelected" actionType="DECISION" parameter="ProcessContext::SelectedEndWarehouseId">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <CaseElse action="SetEndWarehouseId" />
+      </Action>
+      <Action actionType="LOGIC" name="SetEndWarehouseId" call="ProcessContext::TourDataBo.setEndWarehouseId">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::SelectedEndWarehouseId" />
+        </Parameters>
+        <TransitionTo action="LoadEndWarehouseLookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadEndWarehouseLookup" type="LuTourWarehouse">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.endWarehouseId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luEndWarehouse" />
+      </Action>
+      <!-- Co Driver lookup -->
+      <Action actionType="PROCESS" name="ShowCoDriverLookup" process="Tour::FlyoutSelectCoDriverProcess">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::TourDataBo.startWarehouseId" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::CoDriverUserId" value="userId" />
+        </ReturnValues>
+        <TransitionTo action="CoDriverSelected" />
+      </Action>
+      <Action name="CoDriverSelected" actionType="DECISION" parameter="ProcessContext::CoDriverUserId">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <CaseElse action="SetCoDriverUserId" />
+      </Action>
+      <Action actionType="LOGIC" name="SetCoDriverUserId" call="ProcessContext::TourDataBo.setCoDriverUserId">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::CoDriverUserId" />
+        </Parameters>
+        <TransitionTo action="LoadUserLookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadUserLookup" type="LuUser">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.coDriverUserId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luCoDriver" />
+      </Action>
+      <!-- Truck - Lookup & Selection -->
+      <Action name="LoadTruckVehicleTypes" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="vehicleTypes" type="Literal" value="'TruckFast', 'TruckSlow'" />
+        </Parameters>
+        <Return name="ProcessContext::VehicleTypes" />
+        <TransitionTo action="ShowTruckLookup" />
+      </Action>
+      <Action actionType="PROCESS" name="ShowTruckLookup" process="Tour::FlyoutSelectVehicleProcess">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::TourDataBo.startWarehouseId" />
+          <Input name="VehicleTypes" value="ProcessContext::VehicleTypes" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::SelectedTruckId" value="vehicleId" />
+        </ReturnValues>
+        <TransitionTo action="StartTruckSelected" />
+      </Action>
+      <Action name="StartTruckSelected" actionType="DECISION" parameter="ProcessContext::SelectedTruckId">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <Case value="Clear" action="ResetTruckId" />
+        <CaseElse action="SetTruckId" />
+      </Action>
+      <Action name="ResetTruckId" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="selectedTruckId" type="Literal" value="" />
+        </Parameters>
+        <Return name="ProcessContext::SelectedTruckId" />
+        <TransitionTo action="SetTruckId" />
+      </Action>
+      <Action actionType="LOGIC" name="SetTruckId" call="ProcessContext::TourDataBo.setTruckId">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::SelectedTruckId" />
+        </Parameters>
+        <TransitionTo action="LoadTruckLookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadTruckLookup" type="LuTourVehicle">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.truckId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luTruck" />
+      </Action>
+      <!-- Trailer 1 - Lookup & Selection -->
+      <Action name="LoadTrailer1VehicleTypes" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="vehicleTypes" type="Literal" value="'Trailer'" />
+        </Parameters>
+        <Return name="ProcessContext::VehicleTypes" />
+        <TransitionTo action="ShowTrailer1Lookup" />
+      </Action>
+      <Action actionType="PROCESS" name="ShowTrailer1Lookup" process="Tour::FlyoutSelectVehicleProcess">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::TourDataBo.startWarehouseId" />
+          <Input name="VehicleTypes" value="ProcessContext::VehicleTypes" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::SelectedTrailer1Id" value="vehicleId" />
+        </ReturnValues>
+        <TransitionTo action="StartTrailer1Selected" />
+      </Action>
+      <Action name="StartTrailer1Selected" actionType="DECISION" parameter="ProcessContext::SelectedTrailer1Id">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <Case value="Clear" action="ResetTrailer1Id" />
+        <CaseElse action="SetTrailer1Id" />
+      </Action>
+      <Action name="ResetTrailer1Id" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="selectedTrailer1Id" type="Literal" value="" />
+        </Parameters>
+        <Return name="ProcessContext::SelectedTrailer1Id" />
+        <TransitionTo action="SetTrailer1Id" />
+      </Action>
+      <Action actionType="LOGIC" name="SetTrailer1Id" call="ProcessContext::TourDataBo.setTrailer1Id">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::SelectedTrailer1Id" />
+        </Parameters>
+        <TransitionTo action="LoadTrailer1Lookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadTrailer1Lookup" type="LuTourVehicle">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.trailer1Id" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luTrailer1" />
+      </Action>
+      <!-- Trailer 2 - Lookup & Selection -->
+      <Action name="LoadTrailer2VehicleTypes" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="vehicleTypes" type="Literal" value="'Trailer'" />
+        </Parameters>
+        <Return name="ProcessContext::VehicleTypes" />
+        <TransitionTo action="ShowTrailer2Lookup" />
+      </Action>
+      <Action actionType="PROCESS" name="ShowTrailer2Lookup" process="Tour::FlyoutSelectVehicleProcess">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::TourDataBo.startWarehouseId" />
+          <Input name="VehicleTypes" value="ProcessContext::VehicleTypes" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::SelectedTrailer2Id" value="vehicleId" />
+        </ReturnValues>
+        <TransitionTo action="StartTrailer2Selected" />
+      </Action>
+      <Action name="StartTrailer2Selected" actionType="DECISION" parameter="ProcessContext::SelectedTrailer2Id">
+        <CaseEmpty action="ShowTourDetailsUI" />
+        <Case value="Clear" action="ResetTrailer2Id" />
+        <CaseElse action="SetTrailer2Id" />
+      </Action>
+      <Action name="ResetTrailer2Id" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="selectedTrailer2Id" type="Literal" value="" />
+        </Parameters>
+        <Return name="ProcessContext::SelectedTrailer2Id" />
+        <TransitionTo action="SetTrailer2Id" />
+      </Action>
+      <Action actionType="LOGIC" name="SetTrailer2Id" call="ProcessContext::TourDataBo.setTrailer2Id">
+        <Parameters>
+          <Input name="newValue" value="ProcessContext::SelectedTrailer2Id" />
+        </Parameters>
+        <TransitionTo action="LoadTrailer2Lookup" />
+      </Action>
+      <Action actionType="LOAD" name="LoadTrailer2Lookup" type="LuTourVehicle">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourDataBo.trailer2Id" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo.luTrailer2" />
+      </Action>
+      <!-- Start Tour -->
+      <Action name="StartTour" actionType="LOGIC" call="ProcessContext::TourDataBo.startTour">
+        <TransitionTo action="SaveTourData" />
+      </Action>
+      <Action name="SaveTourData" actionType="SAVE">
+      </Action>
+      <!-- Start Tour End -->
+      <!-- Return here vehicleDetailsReviewed to sync it with the tour BO used in the cockpit -->
+      <Action actionType="END" name="End">
+        <ReturnValues>
+          <Return name="vehicleDetailsTourBo" value="ProcessContext::TourDataBo" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

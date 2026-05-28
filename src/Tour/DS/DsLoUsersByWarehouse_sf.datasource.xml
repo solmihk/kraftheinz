@@ -1,0 +1,26 @@
+<DataSource name="DsLoUsersByWarehouse" backendSystem="sf" businessObjectClass="LoUsersByWarehouse" external="false" editableEntity="Warehouse_User__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="User" column="Id" />
+    <DerivedAttribute name="name" value="User.LastName || ', ' || User.FirstName" />
+    <DerivedAttribute name="grouping1" value="substr(User.LastName || ', ' || User.FirstName,1,1)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Warehouse_User__c" alias="" idAttribute="Id" />
+    <Entity name="User" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Warehouse_User__c.User__c" comparator="eq" rightSideType="Attribute" rightSideValue="User.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+    Warehouse_User__c.Warehouse__c = '#warehouseId#' AND Warehouse_User__c.Active__c = '1'
+  ]]></QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="User" attribute="LastName" direction="asc" />
+  </OrderCriteria>
+  <Parameters>
+    <Parameter name="warehouseId" type="TEXT" />
+  </Parameters>
+</DataSource>

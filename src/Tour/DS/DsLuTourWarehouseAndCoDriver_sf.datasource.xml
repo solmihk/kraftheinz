@@ -1,0 +1,18 @@
+<DataSource name="DsLuTourWarehouseAndCoDriver" backendSystem="sf" businessObjectClass="LuTourWarehouseAndCoDriver" external="false" editableEntity="Warehouse_User__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Warehouse_User__c" column="Id" />
+  </Attributes>
+  <Entities>
+    <Entity name="Warehouse_User__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Warehouse_User__c.Warehouse__c = '#warehouseId#' AND Warehouse_User__c.User__c = '#coDriverUserId#' AND Warehouse_User__c.Active__c = '1'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="warehouseId" type="TEXT" />
+    <Parameter name="coDriverUserId" type="TEXT" />
+  </Parameters>
+</DataSource>

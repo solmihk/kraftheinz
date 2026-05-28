@@ -1,0 +1,22 @@
+<DataSource name="DsLoVisitsByVisitStatus" backendSystem="sf" businessObjectClass="LoVisitsByVisitStatus" external="false" editableEntity="Visit" schemaVersion="2.0">
+  <!-- For more information about the supported properties and nodes see corresponding DataSource.md file under ~Workspace/contractSnippets/YourModuel Section/DS/DS_DataSource -->
+  <Attributes>
+    <Attribute name="subject" table="Visit" column="Subject__c" />
+    <Attribute name="plannedVisitStartTime" table="Visit" column="PlannedVisitStartTime" />
+  </Attributes>
+  <Entities>
+    <Entity name="Visit" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+     Visit.Status = #visitStatus#
+     AND Visit.Responsible__c = '#UserPKey#'
+  ]]>
+  </QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="Visit" attribute="plannedVisitStartTime" direction="ASC" />
+  </OrderCriteria>
+  <Parameters>
+    <Parameter name="visitStatus" type="TEXT" />
+  </Parameters>
+</DataSource>

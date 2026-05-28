@@ -1,0 +1,131 @@
+<Process name="InventoryDocument::HeaderTabProcess" defaultAction="ShowUI_Decision" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="DocumentUoMList" type="LoInventoryDocumentUoMSummary" />
+        <Declaration name="ReleaseInProgress" type="DomString" />
+        <Declaration name="releaseProcessOutcome" type="DomString" />
+        <Declaration name="modificationReasonValidationResult" type="DomString" />
+      </Declarations>
+      <Parameters>
+        <Input name="BoInventoryDocument" type="BoInventoryDocument" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action actionType="CREATE" name="LoInventoryDocumentUoMSummary" type="LoInventoryDocumentUoMSummary">
+        <Return name="ProcessContext::DocumentUoMList" />
+      </Action>
+      <Action actionType="LOGIC" name="StoreSysReleasePKey" call="ProcessContext::BoInventoryDocument.storeSysReleaseProcessPKey" />
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="ShowUI_Decision" actionType="DECISION" parameter="ProcessContext::BoInventoryDocument.documentType">
+        <Case value="ProductCheckIn" action="ShowCheckInHeaderTab" />
+        <CaseElse action="ShowHeaderTab" />
+      </Action>
+      <Action name="ShowHeaderTab" actionType="VIEW">
+        <UIDescription>InventoryDocument::HeaderTabUI</UIDescription>
+        <Events>
+          <Event name="reviewReleaseInformation" action="ReviewReleaseInformation" />
+          <Event name="releaseOrder" action="ReleaseOrder" />
+        </Events>
+        <TransitionTo action="calculateUoMSummary" />
+      </Action>
+      <Action name="ShowCheckInHeaderTab" actionType="VIEW">
+        <UIDescription>InventoryDocument::CheckInHeaderTabUI</UIDescription>
+        <Events>
+          <Event name="reviewReleaseInformation" action="ReviewReleaseInformation" />
+          <Event name="releaseOrder" action="ReleaseOrder" />
+        </Events>
+        <TransitionTo action="calculateTemplateUoMSummary" />
+      </Action>
+      <Action actionType="LOGIC" name="calculateUoMSummary" call="ProcessContext::DocumentUoMList.calculateUoMSummary">
+        <Parameters>
+          <Input name="listObject" type="LoInventoryDocumentItems" value="ProcessContext::BoInventoryDocument.LoItemsMainList" />
+        </Parameters>
+        <Return name="ProcessContext::DocumentUoMList" />
+      </Action>
+      <Action actionType="LOGIC" name="calculateTemplateUoMSummary" call="ProcessContext::DocumentUoMList.CalculateTemplateUoMSummary">
+        <Parameters>
+          <Input name="listObject" type="LoInventoryDocumentItems" value="ProcessContext::BoInventoryDocument.LoItemsMainList" />
+        </Parameters>
+        <Return name="ProcessContext::DocumentUoMList" />
+      </Action>
+      <Action actionType="LOGIC" name="ReleaseOrder" call="ProcessContext::BoInventoryDocument.release">
+        <TransitionTo action="ValidateModificationReason" />
+      </Action>
+      <Action actionType="LOGIC" name="ValidateModificationReason" call="ProcessContext::BoInventoryDocument.validateModificationReason">
+        <Return name="ProcessContext::modificationReasonValidationResult" />
+        <TransitionTo action="Release_CheckModificationReasonValidationResultForReleaseProc" />
+      </Action>
+      <Action name="Release_CheckModificationReasonValidationResultForReleaseProc" actionType="DECISION" parameter="ProcessContext::modificationReasonValidationResult">
+        <Case value="valid" action="Release_ValidateBeforeReleaseProcess" />
+        <CaseElse action="ShowUI_Decision" />
+      </Action>
+      <Action name="Release_ValidateBeforeReleaseProcess" actionType="VALIDATION">
+        <Validations>
+          <Validation name="ProcessContext::BoInventoryDocument.doValidateAsync" />
+        </Validations>
+        <TransitionTo action="Release_CheckValidationResultforReleaseProc" />
+      </Action>
+      <Action name="Release_CheckValidationResultforReleaseProc" actionType="DECISION" parameter="ProcessContext::validationResult">
+        <Case value="validateOk" action="setReleaseValidationDone" />
+        <CaseElse action="End" />
+      </Action>
+      <Action actionType="LOGIC" name="setReleaseValidationDone" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::BoInventoryDocument.ReleaseValidationDone" />
+        <TransitionTo action="OpenReleaseProcess" />
+      </Action>
+      <Action actionType="PROCESS" name="OpenReleaseProcess" process="System::ReleaseHandlerProcess">
+        <Parameters>
+          <Input name="referenceObject" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::releaseProcessOutcome" value="releaseProcessOutcome" />
+        </ReturnValues>
+        <TransitionTo action="CheckReleaseCancelledByProcess" />
+      </Action>
+      <Action name="CheckReleaseCancelledByProcess" actionType="DECISION" parameter="ProcessContext::releaseProcessOutcome">
+        <Case value="Cancel" action="CancelRelease" />
+        <CaseElse action="SetReleaseInProgress" />
+      </Action>
+      <Action actionType="LOGIC" name="CancelRelease" call="ProcessContext::BoInventoryDocument.cancelRelease">
+        <Parameters />
+        <TransitionTo action="ShowUI_Decision" />
+      </Action>
+      <Action actionType="LOGIC" name="SetReleaseInProgress" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="yes" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::ReleaseInProgress" />
+        <TransitionTo action="setPhaseInBeforeSave" />
+      </Action>
+      <Action actionType="LOGIC" name="setPhaseInBeforeSave" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::BoInventoryDocument.SetPhaseInBeforeSave" />
+        <TransitionTo action="SaveBoInventoryDocument" />
+      </Action>
+      <!-- Release Information Review -->
+      <Action actionType="PROCESS" name="ReviewReleaseInformation" process="System::ReleaseHandlerProcess">
+        <Parameters>
+          <Input name="referenceObject" value="ProcessContext::BoInventoryDocument" />
+          <Input name="readOnlyMode" type="Literal" value="1" />
+        </Parameters>
+        <TransitionTo action="ShowUI_Decision" />
+      </Action>
+      <Action name="SaveBoInventoryDocument" actionType="SAVE">
+        <Parameters>
+          <Input name="boInventoryDocument" value="ProcessContext::BoInventoryDocument" />
+        </Parameters>
+        <TransitionTo action="End" />
+      </Action>
+      <Action actionType="END" name="End" />
+    </Actions>
+  </Body>
+</Process>

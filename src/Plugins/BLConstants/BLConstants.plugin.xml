@@ -1,0 +1,118 @@
+<Plugin name="BLConstants">
+  <Code language="text/javascript"><![CDATA[
+var BLConstants;
+(function (BLConstants) {
+
+//Application Context (APPCTX)
+BLConstants.APPCTX = {DSD: {}, HYBRID: {}};
+BLConstants.APPCTX.DSD.DSDMODE = "runningInDSDMode";
+BLConstants.APPCTX.DSD.RUNNING_TOUR = "runningTourId";
+BLConstants.APPCTX.DSD.CURRENT_TOUR = "currentTour";
+BLConstants.APPCTX.DSD.CURRENT_TOUR_ID = "currentTourId";
+
+BLConstants.APPCTX.HYBRID.HYBRIDMODE = "runningInHybridMode";
+
+//USERROLES
+BLConstants.USERROLES = {};
+BLConstants.USERROLES.TOURUSER = "TourUser";
+BLConstants.USERROLES.HYBRIDUSER = "HybridUser";
+
+//SYNC
+BLConstants.SYNC = {};
+BLConstants.SYNC.SYNC_OPTION_RELEASE = "Release";
+BLConstants.SYNC.SYNC_OPTION_CANCEL = "Cancel";
+BLConstants.SYNC.SYNC_OPTION_RELEASE_CANCEL = "ReleaseCancel";
+
+//Order constants
+BLConstants.Order = {};
+
+//Pricing Relevant Constants
+BLConstants.Order.BUTTON_MODE = "4";
+BLConstants.Order.EDIT_MODE = "5";
+BLConstants.Order.CALCULATION_REQUIRED = "3";
+BLConstants.Order.ALWAYS_CALCULATE = "AlwaysCalculate";
+
+//Printout Name Constants
+BLConstants.Order.STANDARD_CASH_ORDER_PDF = "StandardCashOrderPDF";
+BLConstants.Order.DIRECT_CREDIT_ORDER_PDF = "DirectCreditOrderPDF";
+BLConstants.Order.ORDER_CONFIRMATION_PDF = "OrderConfirmationPDF";
+BLConstants.Order.DIRECT_CASH_INVOICE_PDF = "DirectCashInvoicePDF";
+BLConstants.Order.STANDARD_CREDIT_INVOICE_PDF = "StandardCreditInvoicePDF";
+BLConstants.Order.STORE_TRANSFER_PDF = "StoreTransferPDF";
+BLConstants.Order.STANDARD_RETURNS_PDF = "StandardReturnsPDF";
+BLConstants.Order.VAN_SALES_CASH_INVOICE_PDF = "VanSalesCashInvoicePDF";
+BLConstants.Order.VAN_SALES_NO_PAYMENT_INVOICE_PDF = "VanSalesNoPaymentInvoicePDF";
+BLConstants.Order.DELIVERY_CASH_INVOICE_PDF = "DeliveryCashInvoicePDF";
+BLConstants.Order.DELIVERY_CREDIT_INVOICE_PDF = "DeliveryCreditInvoicePDF";
+
+//Order Phase Constants
+BLConstants.Order.PHASE_INITIAL = "Initial";
+BLConstants.Order.PHASE_READY = "Ready";
+BLConstants.Order.PHASE_RELEASED = "Released";
+BLConstants.Order.PHASE_FEEDBACK = "Feedback";
+BLConstants.Order.PHASE_CANCELED = "Canceled";
+BLConstants.Order.PHASE_CLOSED = "Closed";
+BLConstants.Order.PHASE_VOIDED = "Voided";
+
+//Order Sync Constants
+BLConstants.Order.SYNC_SUCCESSFUL = 0;
+BLConstants.Order.SYNC_AWAITING = 1;
+BLConstants.Order.SYNC_ERROR = 2;
+BLConstants.Order.NOT_SYNCABLE = 3 ;
+
+// Order document type constants
+BLConstants.Order.DOCUMENT_TYPE_CASH_CHECK_IN = "CashCheckIn";
+BLConstants.Order.DOCUMENT_TYPE_CASH_CHECK_OUT = "CashCheckOut";
+BLConstants.Order.DOCUMENT_TYPE_DELIVERY = "Delivery";
+BLConstants.Order.DOCUMENT_TYPE_ORDER_ENTRY = "OrderEntry";
+BLConstants.Order.DOCUMENT_TYPE_PRODUCT_CHECK_IN = "ProductCheckIn";
+BLConstants.Order.DOCUMENT_TYPE_PRODUCT_CHECK_OUT = "ProductCheckOut";
+BLConstants.Order.DOCUMENT_TYPE_TRUCK_AUDIT = "TruckAudit";
+BLConstants.Order.DOCUMENT_TYPE_INVOICE = "Invoice";
+
+//Default Images
+BLConstants.DefaultImages = {};
+BLConstants.DefaultImages.EMPTY_IMAGE = "EmptyImage";
+BLConstants.DefaultImages.RED_EXCLAMATION_MARK = "PrioHigh24";
+
+//Visit Constants
+BLConstants.VISIT = {};
+
+//Visit Status
+BLConstants.VISIT.STATUS_PLANNED = "Planned";
+BLConstants.VISIT.STATUS_INPROGRESS = "InProgress";
+BLConstants.VISIT.STATUS_COMPLETED = "Completed";
+BLConstants.VISIT.STATUS_ABANDONED = "Abandoned";
+BLConstants.VISIT.STATUS_CANCELLED = "Canceled";
+
+//Tour Constants
+BLConstants.TOUR = {};
+
+//Tour Status
+BLConstants.TOUR.STATUS_INITIAL = 'Initial';
+BLConstants.TOUR.STATUS_OPEN = 'Open';
+BLConstants.TOUR.STATUS_RUNNING = 'Running';
+BLConstants.TOUR.STATUS_COMPLETED = 'Completed';
+BLConstants.TOUR.STATUS_CANCELLED = 'Canceled';
+
+BLConstants.TOUR_ACTIVITY = {};
+BLConstants.TOUR_ACTIVITY.OPEN = 'Status_Open';
+BLConstants.TOUR_ACTIVITY.COMPLETED = 'Status_Completed';
+
+BLConstants.TOURCHECKUSAGE = {};
+BLConstants.TOURCHECKUSAGE.START_DAY = 'S';
+BLConstants.TOURCHECKUSAGE.END_DAY = 'E';
+
+BLConstants.TOURCHECKTYPE = {};
+BLConstants.TOURCHECKTYPE.VEHICLECHECK = 'VehicleCheck';
+BLConstants.TOURCHECKTYPE.SAFETYCHECK = 'SafetyCheck';
+
+//UI Constants
+BLConstants.UI = {};
+
+//UI Non-breakeable space for list layouts
+BLConstants.UI.NOBREAKSPACEUNICODECHAR = '\u00A0';
+
+})(BLConstants || (BLConstants = {}));
+]]></Code>
+</Plugin>

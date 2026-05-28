@@ -1,0 +1,26 @@
+<DataSource name="DsLuTourDocumentsCount" backendSystem="sf" businessObjectClass="LuTourDocumentsCount" external="false" editableEntity="Order__c" schemaVersion="2.0">
+  <Attributes>
+    <DerivedAttribute name="tourDocumentsCount" value="Count(*)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Order__c" alias="" idAttribute="Id" />
+    <Entity name="Order_Template__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Order_Template__c.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Order__c.Order_Template__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition >
+    <![CDATA[
+    Order__c.Tour__c = '#tourPKey#'
+    AND Order_Template__c.Document_Type__c = 'Delivery'
+    AND Order__c.Phase__c NOT IN ('Closed', 'Released', 'Canceled')
+  ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters >
+    <Parameter name="tourPKey" type="TEXT" />
+  </Parameters>
+</DataSource>

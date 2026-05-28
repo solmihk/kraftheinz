@@ -1,0 +1,368 @@
+<UIDescription name="Tour::DriverCockpitUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionPage">
+    <PageHeader>
+      <Bindings>
+        <Resource target="title" type="Label" id="DriverCockpitTitle" defaultLabel="Cockpit" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem directlyVisible="true" itemId="RefreshDriverCockpit">
+          <Bindings>
+            <Resource target="Text" type="Label" id="RefreshDriverCockpit" defaultLabel="Refresh" />
+            <Resource target="Icon" type="Image" id="Refresh" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="RefreshDriverCockpit" />
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Bindings>
+        <Resource target="LogoIcon" type="Image" id="LogoSalesforce" />
+        <Resource target="AltLogoIcon" type="Image" id="LogoSalesforce" />
+      </Bindings>
+      <Area areaName="mainArea" areaPattern="Card">
+        <NavigationMenuContainer name="DriverCockpitMenu">
+          <NavigationMenuItem name="TourMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="BurgerMenu_Tour" />
+              <Resource target="Title" type="Label" id="BurgerMenu_Tour" defaultLabel="Tour" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showTourOverview" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="CustomerMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="UserTie_LM" />
+              <Resource target="Title" type="Label" id="BurgerMenu_Customer" defaultLabel="Customer" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showCustomerOverview" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="ProductMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="Products" />
+              <Resource target="Title" type="Label" id="BurgerMenu_Product" defaultLabel="Product" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showProductOverview" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="NotificationsMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="Speechbubble" />
+              <Resource target="Title" type="Label" id="BurgerMenu_Notifications" defaultLabel="Notifications" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showNotificationsOverview" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="PersonalSettingsMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="Usrsettings" />
+              <Resource target="Title" type="Label" id="BurgerMenu_PersonalSettings" defaultLabel="My Settings" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showPersonalSettings" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="AboutMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="Info" />
+              <Resource target="Title" type="Label" id="BurgerMenu_About" defaultLabel="About" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_showAboutScreen" />
+            </Events>
+            <VisibilityRoles allRoles="false">
+              <Role name="TourUser" />
+            </VisibilityRoles>
+          </NavigationMenuItem>
+          <NavigationMenuItem name="LogoutMenuItem">
+            <Bindings>
+              <Resource target="Image" type="Image" id="Logout" />
+              <Resource target="Title" type="Label" id="BurgerMenu_Logout" defaultLabel="Logout" />
+            </Bindings>
+            <Events>
+              <ButtonPressedEvent event="BurgerMenu_logout" />
+            </Events>
+            <VisibilityRoles allRoles="true" />
+          </NavigationMenuItem>
+        </NavigationMenuContainer>
+         <!-- User Welcome Card Start-->
+         <CardContainer name="CardUserWelcome">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardUserWelcome" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardUserWelcome" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="UserWelcomeCardTitle" defaultLabel="Summary" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardUserWelcome" bindingMode="TWO_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardUserWelcome_DataLoaded" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardUserWelcome_loadData" />
+          </Events>
+
+          <UserWelcome name="UserWelcomeCardUiPlugin">
+            <Bindings>
+              <Binding target="userImage" type="Blob" binding="ApplicationContext::User.profilePicture" />
+              <Binding target="userName" type="Text" binding="ApplicationContext::User.name" bindingMode="ONE_WAY" />
+              <Resource target="tourLabel" type="Label" id="TourCountId" defaultLabel="Tours Remaining" />
+              <Binding target="tourCount" type="Text" binding="ProcessContext::CardUserWelcome_RemainingTourCount.tourCountRemaining" bindingMode="ONE_WAY" />
+              <Resource target="userMessage" type="Label" id="CardUserWelcome_MessageText" defaultLabel="Have a great day." />
+              <Binding target="isTourUser" type="Bool" binding="ProcessContext::CardController.isTourUser" />
+              <Resource id="NoUser" target="userDefaultImage" type="Image" />
+              <Binding target="selectedDate" type="Text" binding="ProcessContext::CardDate" bindingMode="ONE_WAY" />
+              <Resource target="previousDayIcon" type="Image" id="ChevronLeft" defaultImage="ChevronLeft" />
+              <Resource target="nextDayIcon" type="Image" id="ChevronRight" defaultImage="ChevronRight" />
+              <Resource target="previousDayOnTouchIcon" type="Image" id="ChevronLeftPressed" defaultImage="ChevronLeftPressed" />
+              <Resource target="nextDayOnTouchIcon" type="Image" id="ChevronRightPressed" defaultImage="ChevronRightPressed" />
+              <Resource target="todayIcon" type="Image" id="TodayIcon" defaultImage="TodayIcon" />
+              <Resource target="todayLabel" type="Label" id="TodayLabel" defaultLabel="Today" />
+            </Bindings>
+          </UserWelcome>
+        </CardContainer>
+         <!-- User Welcome Card End -->
+        <!-- Tour Schedule Start -->
+        <CardContainer name="TourSchedule">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourSchedule" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardTourSchedule" />
+              </Parameters>
+            </Binding>
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardTourSchedule" bindingMode="TWO_WAY" />
+            <Resource target="Title" type="Label" id="CardTourScheduleTitle" defaultLabel="Tour Schedule" />
+            <Binding target="Information" type="Text" binding="ProcessContext::CardTourSchedule_InformationText" bindingMode="ONE_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardTourSchedule_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="DisplayedSubcomponentName" type="Text" binding="ProcessContext::CardTourSchedule_DisplayedSubcomponentName" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardTourSchedule_loadData" />
+          </Events>
+          <NoDataMessage name="CardNoDataMessageUiPlugin">
+            <Bindings>
+              <Resource target="infoIcon" type="Image" id="Trophy" />
+              <Resource target="maintext" type="Label" id="CardTourSchedule_NoDataMessageMainText" defaultLabel="Congratulations," />
+              <Resource target="subtext" type="Label" id="CardTourSchedule_NoDataMessageSubText" defaultLabel="you have completed all tours. :)" />
+            </Bindings>
+          </NoDataMessage>
+          <CockpitList name="TourSchedule" hasBorder="false" dataSource="ProcessContext::CardTourSchedule_TourScheduleList.Items[]">
+            <Items name="Items" itemPattern="CardTourScheduleItems">
+              <ItemListLayout>
+                <Default>
+                  <Col flex="1">
+                    <Row layoutType="itemIdentifierCockpit" bindingId="Description" />
+                    <Row layoutType="itemSecondaryCockpit" bindingId="StartDate" />
+                  </Col>
+                  <Col>
+                    <Row>
+                      <Col width="3.5em" layoutType="itemSecondaryCockpit" bindingId="VisitLabel" />
+                      <Col width="1.5em" align="right" layoutType="itemSecondaryCockpit" bindingId="VisitCount" />
+                    </Row>
+                    <Row layoutType="itemSecondaryCockpit" bindingId="Status" />
+                  </Col>
+                  <Col width="1.5em" height="1.5em" layoutType="Image" bindingId="StatusIcon" />
+                </Default>
+              </ItemListLayout>
+              <Bindings>
+                <Binding target="Description" type="Text" binding=".description" bindingMode="ONE_WAY" />
+                <Binding target="StartDate" type="Date" binding=".dateFrom" bindingMode="ONE_WAY" />
+                <Resource target="VisitLabel" type="Label" id="visitLabel" defaultLabel="Visits: " />
+                <Binding target="VisitCount" type="Text" binding=".visitCount" bindingMode="ONE_WAY" />
+                <Binding target="Status" type="Text" binding=".status" bindingMode="ONE_WAY" />
+                <Binding target="StatusIcon" type="Image" binding=".statusIcon" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+            <Events>
+              <ItemSelectedEvent event="itemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                </Params>
+              </ItemSelectedEvent>
+            </Events>
+          </CockpitList>
+          <LinkBar>
+            <ImageButton name="AllTours">
+              <Bindings>
+                <Binding target="Text" type="Text" binding="ProcessContext::CardTourSchedule_ShowAllButtonLabel" bindingMode="ONE_WAY"/>
+                <Resource target="Image" type="Image" id="Trip" defaultImage="Tour" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="TourOverview_showAllTours" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Tour Schedule End -->
+        <!-- Notifications Card-->
+        <CardContainer name="CardUserNotifications">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardUserNotifications" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardUserNotifications" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="UserNotificationsCardTitle" defaultLabel="Notifications" />
+            <Binding target="Information" type="Text" binding="ProcessContext::CardNotifications_InformationText" bindingMode="ONE_WAY" />
+            <Binding target="IsReadyToLoad" type="Text" binding="ProcessContext::CardNotifications_DataLoaded" bindingMode="ONE_WAY" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.collapseState_CardUserNotifications" bindingMode="TWO_WAY" />
+            <Binding target="DisplayedSubcomponentName" type="Text" binding="ProcessContext::CardNotifications_DisplayedSubcomponentName" bindingMode="ONE_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="false">
+            <Role name="TourUser" />
+          </VisibilityRoles>
+          <Events>
+            <LoadContainerData event="CardNotifications_loadData" />
+          </Events>
+          <NoDataMessage name="CardNoDataMessageUiPlugin">
+            <Bindings>
+              <Resource target="maintext" type="Label" id="CardNotifications_NoDataMessageMainText" defaultLabel="Congratulations," />
+              <Resource target="subtext" type="Label" id="CardNotifications_NoDataMessageSubText" defaultLabel="you have an empty inbox. :)" />
+              <Resource id="Trophy" target="infoIcon" type="Image" />
+            </Bindings>
+          </NoDataMessage>
+          <CockpitList name="Notifications" hasBorder="false" dataSource="ProcessContext::CardNotifications_List.Items[]">
+            <Items name="Items" itemPattern="TourDriverCardNotificationsItems">
+              <ItemListLayout>
+                <Default>
+                  <Col flex="1">
+                    <Row layoutType="itemIdentifierCockpit" bindingId="subject" />
+                    <Row layoutType="itemSecondaryCockpit" bindingId="dueDateText" />
+                  </Col>
+                  <Col width="1em" height="1.6em" layoutType="Image" bindingId="priorityCardImage" />
+                </Default>
+                <Tablet>
+                  <Default>
+                    <Col flex="1">
+                      <Row layoutType="itemIdentifierCockpit" bindingId="subject" />
+                      <Row layoutType="itemSecondaryCockpit" bindingId="dueDateText" />
+                    </Col>
+                    <Col width="1em" height="1.6em" layoutType="Image" bindingId="priorityCardImage" />
+                  </Default>
+                </Tablet>
+                <Phone>
+                  <Default>
+                    <Col flex="1">
+                      <Row layoutType="itemIdentifierCockpit" bindingId="subject" />
+                      <Row layoutType="itemSecondaryCockpit" bindingId="dueDateText" />
+                    </Col>
+                    <Col width="1em" height="1.6em" layoutType="Image" bindingId="priorityCardImage" />
+                  </Default>
+                </Phone>
+              </ItemListLayout>
+              <ContextMenu>
+                <Bindings>
+                  <Binding target="DataSource" binding="ProcessContext::CardNotifications_ContextMenuList.Items[]" bindingMode="ONE_WAY" />
+                </Bindings>
+                <Items name="ContextMenuItems">
+                  <Bindings>
+                    <Binding target="Icon" type="Image" binding=".actionImg" />
+                    <Binding target="Text" type="Label" binding=".actionId" />
+                    <Binding type="Editable" target="Editable" binding=".actionEnabled" />
+                  </Bindings>
+                </Items>
+              </ContextMenu>
+              <Bindings>
+                <Binding target="subject" type="Text" binding=".subject" bindingMode="ONE_WAY" />
+                <Binding target="dueDateText" type="Text" binding=".dueDateText" bindingMode="ONE_WAY" />
+                <Binding target="priorityCardImage" type="Image" binding=".priorityCardImage" bindingMode="ONE_WAY" />
+              </Bindings>
+            </Items>
+            <Events>
+              <ItemSelectedEvent event="CardNotifications_itemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                </Params>
+              </ItemSelectedEvent>
+              <ContextOpeningEvent event="CardNotifications_contextMenuOpening">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                </Params>
+              </ContextOpeningEvent>
+              <ContextSelectedEvent event="CardNotifications_contextMenuItemSelected">
+                <Params>
+                  <Param name="pKey" value=".pKey" />
+                </Params>
+              </ContextSelectedEvent>
+            </Events>
+          </CockpitList>
+          <LinkBar>
+            <ImageButton name="AllNotificationsLink">
+              <Bindings>
+                <Resource target="Text" type="Label" id="ShowNotificationsLink" defaultLabel="All Notifications" bindingMode="ONE_WAY" />
+                <Resource target="Image" type="Image" id="Notification_HB" defaultImage="Notification_HB" />
+              </Bindings>
+              <Events>
+                <ButtonPressedEvent event="CardNotifications_showAllNotifications" />
+              </Events>
+            </ImageButton>
+          </LinkBar>
+        </CardContainer>
+        <!-- Sync Card Start -->
+        <!-- Sync Card -->
+        <SyncCardContainer name="cardSync">
+          <Bindings>
+            <Binding type="Visible" target="Visible" call="ProcessContext::CardController.isCardVisible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardSync" />
+              </Parameters>
+            </Binding>
+            <Binding type="Text" target="IsCollapsible" call="ProcessContext::CardController.isCardCollapsible" bindingMode="ONE_WAY">
+              <Parameters>
+                <Input name="cardName" type="Literal" value="CardSync" />
+              </Parameters>
+            </Binding>
+            <Resource target="Title" type="Label" id="SyncCardTitle" defaultLabel="Sync Status" />
+            <Binding target="CollapseState" type="Text" binding="ProcessContext::CardController.CollapseState_CardSync" bindingMode="TWO_WAY" />
+          </Bindings>
+          <VisibilityRoles allRoles="true" />
+          <CardEventSubcription>
+            <CardEvent name="onAutoReload" intervalInSeconds="10" />
+          </CardEventSubcription>
+        </SyncCardContainer>
+        <!-- Sync Card End -->
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

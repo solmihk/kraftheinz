@@ -1,0 +1,488 @@
+<Datasource name="DsLoInventoryDocumentItems" backendSystem="sf" businessObjectClass="LoInventoryDocumentItems" readOnly="false" external="true" editableEntity="Order_Item__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Order_Item__c" column="Id" />
+    <Attribute name="uom" table="Order_Item__c" column="UoM__c" />
+    <Attribute name="quantity" table="Order_Item__c" column="Quantity__c" />
+    <Attribute name="targetQuantity" table="Order_Item__c" column="Target_Quantity__c" />
+    <Attribute name="suggestedQuantity" table="Order_Item__c" column="Suggested_Quantity__c" />
+    <Attribute name="productId" table="Order_Item__c" column="Product__c" />
+    <Attribute name="modificationReason" table="Order_Item__c" column="Modification_Reason__c" />
+    <Attribute name="price" table="Order_Item__c" column="Price__c" />
+    <Attribute name="priceReceipt" table="Order_Item__c" column="Price_Receipt__c" />
+    <Attribute name="basePrice" table="Order_Item__c" column="Base_Price__c" />
+    <Attribute name="value" table="Order_Item__c" column="Value__c" />
+    <Attribute name="valueReceipt" table="Order_Item__c" column="Value_Receipt__c" />
+    <Attribute name="grossValueReceipt" table="Order_Item__c" column="Gross_Value_Receipt__c" />
+    <Attribute name="leftQuantity" table="Order_Item__c" column="Left_Quantity__c" />
+    <Attribute name="basePrice" table="Order_Item__c" column="Base_Price__c" />
+    <DerivedAttribute name="simplePricingBasePrice" value="Order_Item__c.Base_Price__c" />
+    <DerivedAttribute name="grossValue" value="'0.0'" />
+    <Attribute name="specialPriceReceipt" table="Order_Item__c" column="Special_Price_Receipt__c" />
+    <Attribute name="orderItemTemplateId" table="Order_Item__c" column="Order_Item_Template__c" />
+    <Attribute name="orderId" table="Order_Item__c" column="Order__c"/>
+    <Attribute name="checkInReasonCode" table="Order_Item__c" column="Check_In_Reason_Code__c" />
+    <!-- Product2-->
+    <Attribute name="description1" table="Product2" column="Description_1_#Language#__c" />
+    <Attribute name="shortDescription" table="Product2" column="Short_Description_#Language#__c" />
+    <Attribute name="gtin" table="Product2" column="GTIN__c" />
+    <Attribute name="consumerGoodsProductCode" table="Product2" column="Consumer_Goods_Product_Code__c" />
+    <Attribute name="productType" table="Product2" column="Product_Type__c" />
+    <Attribute name="criterion3ProductDescription" table="Product2" column="Criterion_3_Product_Description__c" />
+    <!-- Unit_Of_Measure__c -->
+    <Attribute name="sort" table="Unit_Of_Measure__c" column="Sort__c" />
+    <Attribute name="isOrderUnit" table="Unit_Of_Measure__c" column="Is_Order_Unit__c" />
+    <Attribute name="basePriceReceipt" table="Order_Item__c" column="Base_Price__c" />
+    <Attribute name="discount" table="Order_Item__c" column="Discount__c" />
+    <Attribute name="piecesPerSmallestUnit" table="Unit_Of_Measure__c" column="Pieces_per_Smallest_Unit__c" />
+    <Attribute name="piecesPerSmallestUnitForBasePrice" table="PriceUnit" column="Pieces_per_Smallest_Unit__c" />
+    <Attribute name="isPriceUnit" table="Unit_Of_Measure__c" column="Is_Price_Unit__c" />
+    <!-- Product_Condition__c-->
+    <Attribute name="simplePricingBasePrice" table="Product_Condition__c" column="Value__c" />
+    <!-- Order_Item_Template__c-->
+    <Attribute name="priceEffect" table="Order_Item_Template__c" column="Price_Effect__c" />
+    <Attribute name="orderItemTemplateShortText" table="Order_Item_Template__c" column="Short_Text__c" />
+    <Attribute name="orderItemTemplateText" table="Order_Item_Template__c" column="Description_#Language#__c" />
+    <!-- Derived -->
+    <DerivedAttribute name="referenceId" />
+    <DerivedAttribute name="isInventoryUom"/>
+  </Attributes>
+  <Entities>
+    <Entity name="Order_Item__c" alias="" idAttribute="Id" />
+  </Entities>
+  <Database platform="SQLite">
+    <Load>
+      <![CDATA[
+      // ###########################################
+      // ## Items linked to the checkout Document ##
+      // ###########################################
+
+      var orderId = "";
+      var commitDate = "";
+
+      if (Utils.isDefined(jsonQuery.orderId)){
+        orderId = Utils.convertForDBParam(jsonQuery.orderId, "DomPKey");
+      }
+      if (Utils.isDefined(jsonQuery.commitDate)){
+        commitDate = Utils.convertForDBParam(jsonQuery.commitDate, "DomDate");
+      }
+      var sqlParams = {orderId,commitDate};
+
+
+      var sqlstmt = " SELECT * from( ";
+      sqlstmt += " 	SELECT Order_Item__c.Id AS pKey ";
+      sqlstmt += " 	,'0'  AS isAddedMissingUoMItem ";
+      sqlstmt += " 	,Order_Item__c.UoM__c AS uom ";
+      sqlstmt += " 	,Order_Item__c.Quantity__c AS quantity ";
+      sqlstmt += " 	,Order_Item__c.Target_Quantity__c AS targetQuantity ";
+      sqlstmt += " 	,Order_Item__c.Suggested_Quantity__c AS suggestedQuantity ";
+      sqlstmt += " 	,Order_Item__c.Product__c AS productId ";
+      sqlstmt += " 	,Order_Item__c.Modification_Reason__c AS modificationReason ";
+      sqlstmt += " 	,Order_Item__c.Price__c AS price ";
+      sqlstmt += " 	,Order_Item__c.Price_Receipt__c AS priceReceipt ";
+      sqlstmt += " 	,Order_Item__c.Base_Price__c AS basePrice ";
+      sqlstmt += " 	,Order_Item__c.Value__c AS value ";
+      sqlstmt += " 	,Order_Item__c.Value_Receipt__c AS valueReceipt ";
+      sqlstmt += " 	,Order_Item__c.Gross_Value_Receipt__c AS grossValueReceipt ";
+      sqlstmt += " 	,Order_Item__c.Order_Item_Template__c AS orderItemTemplateId ";
+      sqlstmt += " 	,Order_Item__c.Product__c || Order_Item__c.Order_Item_Template__c  AS referenceId ";
+      sqlstmt += " 	,Order_Item__c.Order__c AS orderId ";
+      sqlstmt += " 	,Order_Item__c.Check_In_Reason_Code__c AS checkInReasonCode ";
+      sqlstmt += " 	,Order_Item__c.Left_Quantity__c AS leftQuantity ";
+      sqlstmt += " 	,Product2.Description_1_#Language#__c AS description1 ";
+      sqlstmt += " 	,Product2.Short_Description_#Language#__c AS shortDescription ";
+      sqlstmt += " 	,Product2.GTIN__c AS gtin ";
+      sqlstmt += " 	,Product2.Consumer_Goods_Product_Code__c AS consumerGoodsProductCode ";
+      sqlstmt += " 	,Product2.Product_Type__c AS productType ";
+      sqlstmt += " 	,Product2.Criterion_3_Product_Description__c AS criterion3ProductDescription ";
+      sqlstmt += " 	,Product_Condition__c.Value__c AS simplePricingBasePrice ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Sort__c AS sort ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Is_Order_Unit__c AS isOrderUnit ";
+      sqlstmt += " 	,PriceUnit.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnitForBasePrice";
+      sqlstmt += " 	,Unit_Of_Measure__c.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnit";
+      sqlstmt += " 	,Unit_Of_Measure__c.Is_Price_Unit__c AS isPriceUnit ";
+      sqlstmt += "  ,Order_Item_Template__c.Price_Effect__c AS priceEffect";
+      sqlstmt += "  ,Order_Item_Template__c.Short_Text__c AS orderItemTemplateShortText";
+      sqlstmt += "  ,Order_Item_Template__c.Description_#Language#__c AS orderItemTemplateText";
+      sqlstmt += " FROM Order_Item__c ";
+      sqlstmt += " INNER JOIN Product2 ON Order_Item__c.Product__c = Product2.Id ";
+      sqlstmt += " INNER JOIN Unit_Of_Measure__c ON Unit_Of_Measure__c.Product__c = Order_Item__c.Product__c ";
+      sqlstmt += " INNER JOIN Product_Condition__c ON Order_Item__c.Product__c = Product_Condition__c.Product__c ";
+      sqlstmt += " INNER JOIN Condition_Template__c ON Condition_Template__c.Id = Product_Condition__c.Condition_Template__c ";
+      sqlstmt += " INNER JOIN Order_Item_Template__c ON Order_Item_Template__c.Id = Order_Item__c.Order_Item_Template__c ";
+      sqlstmt += " INNER JOIN Unit_of_Measure__c AS PriceUnit ON Order_Item__c.Product__c = PriceUnit.Product__c ";
+      sqlstmt += " 	AND Unit_Of_Measure__c.Unit_Type__c = Order_Item__c.UoM__c ";
+      sqlstmt += " WHERE 1 = 1 ";
+      sqlstmt += " 	AND Order_Item__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Product2.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Unit_Of_Measure__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Product_Condition__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Condition_Template__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Order_Item_Template__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND PriceUnit.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Order_Item__c.Order__c = '#orderId#' ";
+      sqlstmt += " 	AND Unit_Of_Measure__c.Order_Ability__c = '1' ";
+      sqlstmt += " 	AND PriceUnit.Is_Price_Unit__c = '1' ";
+      sqlstmt += "  AND #compareAsDate('Product_Condition__c.Valid_From__c', 'Date','<=' , #commitDate#, 'Date')# ";
+      sqlstmt += "  AND #compareAsDate('Product_Condition__c.Valid_Thru__c', 'Date','>=' ,#commitDate#, 'Date')# ";
+      sqlstmt += "  AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_Type__c AND System_Setting__c.Name = 'Default_Price_Type' AND System_Setting__c.IsDeleted <> '1') ";
+      sqlstmt += "  AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_List_Type__c AND System_Setting__c.Name = 'Default_Price_List_Type' AND System_Setting__c.IsDeleted <> '1') ";
+      
+      // ###########################
+      // ## Missing UoMs of Items ##
+      // ###########################
+      sqlstmt += " UNION ALL ";
+      sqlstmt += " 	SELECT  ' ' AS pKey ";
+      sqlstmt += " 	,'1'  AS isAddedMissingUoMItem ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Unit_Type__c AS uom ";
+      sqlstmt += " 	,0  AS quantity ";
+      sqlstmt += " 	,0 AS targetQuantity ";
+      sqlstmt += " 	,0 AS suggestedQuantity ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Product__c AS productId ";
+      sqlstmt += " 	,' ' AS modificationReason ";
+      sqlstmt += " 	,0 AS price ";
+      sqlstmt += " 	,0 AS priceReceipt ";
+      sqlstmt += " 	,0 AS basePrice ";
+      sqlstmt += " 	,0 AS value ";
+      sqlstmt += " 	,0 AS valueReceipt ";
+      sqlstmt += " 	,0 AS grossValueReceipt ";
+      sqlstmt += " 	,Order_Item__c.Order_Item_Template__c AS orderItemTemplateId ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Product__c || Order_Item__c.Order_Item_Template__c  AS referenceId ";
+      sqlstmt += " 	,Order_Item__c.Order__c AS orderId ";
+      sqlstmt += " 	,Order_Item__c.Check_In_Reason_Code__c AS checkInReasonCode ";
+      sqlstmt += " 	,Order_Item__c.Left_Quantity__c AS leftQuantity ";
+      sqlstmt += " 	,Product2.Description_1_#Language#__c AS description1 ";
+      sqlstmt += " 	,Product2.Short_Description_#Language#__c AS shortDescription ";
+      sqlstmt += " 	,Product2.GTIN__c AS gtin ";
+      sqlstmt += " 	,Product2.Consumer_Goods_Product_Code__c AS consumerGoodsProductCode ";
+      sqlstmt += " 	,Product2.Product_Type__c AS productType ";
+      sqlstmt += " 	,Product2.Criterion_3_Product_Description__c AS criterion3ProductDescription ";
+      sqlstmt += " 	,Product_Condition__c.Value__c AS simplePricingBasePrice ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Sort__c AS sort ";
+      sqlstmt += " 	,Unit_Of_Measure__c.Is_Order_Unit__c AS isOrderUnit ";
+      sqlstmt += " 	,PriceUnit.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnitForBasePrice";
+      sqlstmt += " 	,Unit_Of_Measure__c.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnit";
+      sqlstmt += " 	,Unit_Of_Measure__c.Is_Price_Unit__c AS isPriceUnit ";
+      sqlstmt += "  ,Order_Item_Template__c.Price_Effect__c AS priceEffect";
+      sqlstmt += "  ,Order_Item_Template__c.Short_Text__c AS orderItemTemplateShortText";
+      sqlstmt += "  ,Order_Item_Template__c.Description_#Language#__c AS orderItemTemplateText";
+      sqlstmt += " FROM Order_Item__c ";
+      sqlstmt += " INNER JOIN Product2 ON Order_Item__c.Product__c = Product2.Id ";
+      sqlstmt += " INNER JOIN Unit_Of_Measure__c ON Unit_Of_Measure__c.Product__c = Order_Item__c.Product__c ";
+      sqlstmt += " INNER JOIN Product_Condition__c ON Order_Item__c.Product__c = Product_Condition__c.Product__c ";
+      sqlstmt += " INNER JOIN Condition_Template__c ON Condition_Template__c.Id = Product_Condition__c.Condition_Template__c ";
+      sqlstmt += " INNER JOIN Order_Item_Template__c ON Order_Item_Template__c.Id = Order_Item__c.Order_Item_Template__c ";
+      sqlstmt += " INNER JOIN Unit_of_Measure__c AS PriceUnit ON Order_Item__c.Product__c = PriceUnit.Product__c ";
+      
+      sqlstmt += " AND NOT EXISTS "
+      sqlstmt += " ( ";
+      sqlstmt += "   SELECT NULL FROM Order_Item__c items ";
+      sqlstmt += "   WHERE items.Product__c = Order_Item__c.Product__c ";
+      sqlstmt += "   AND items.Order_Item_Template__c = Order_Item__c.Order_Item_Template__c ";
+      sqlstmt += "   AND items.UoM__c = Unit_Of_Measure__c.Unit_Type__c ";
+      sqlstmt += "    AND items.Order__c = Order_Item__c.Order__c ";
+      sqlstmt += "    AND items.IsDeleted <> '1' ";
+      sqlstmt += " ) ";
+      sqlstmt += " WHERE 1 = 1 ";
+      sqlstmt += " 	AND Order_Item__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Product2.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Unit_Of_Measure__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Product_Condition__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Condition_Template__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Order_Item_Template__c.IsDeleted <> '1' ";
+      sqlstmt += " 	AND PriceUnit.IsDeleted <> '1' ";
+      sqlstmt += " 	AND Order_Item__c.Order__c = '#orderId#' ";
+      sqlstmt += " 	AND Unit_Of_Measure__c.Order_Ability__c = '1' ";
+      sqlstmt += " 	AND PriceUnit.Is_Price_Unit__c = '1' ";
+      sqlstmt += " AND #compareAsDate('Product_Condition__c.Valid_From__c', 'Date','<=' , #commitDate#, 'Date')# ";
+      sqlstmt += "  AND #compareAsDate('Product_Condition__c.Valid_Thru__c', 'Date','>=' ,#commitDate#, 'Date')# ";
+      sqlstmt += " AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_Type__c AND System_Setting__c.Name = 'Default_Price_Type' AND System_Setting__c.IsDeleted <> '1') ";
+      sqlstmt += " AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_List_Type__c AND System_Setting__c.Name = 'Default_Price_List_Type' AND System_Setting__c.IsDeleted <> '1') ";
+      sqlstmt += " ) ";
+      sqlstmt += " ORDER BY referenceId ASC, ";
+      sqlstmt += " 	     isOrderUnit DESC ";
+      
+      return Utils.replaceMacrosParam(sqlstmt, sqlParams);
+      ]]>
+    </Load>
+    <Custom>
+      <CheckIn_PersistedItems>
+        <![CDATA[
+          // #######################################
+          // ## CheckIn Items already saved on DB ##
+          // #######################################
+
+          var orderId = "";
+          var commitDate = "";
+
+          if (Utils.isDefined(jsonParams.orderId)){
+            orderId = Utils.convertForDBParam(jsonParams.orderId, 'DomPKey');
+          }
+          if (Utils.isDefined(jsonParams.commitDate)){
+            commitDate = Utils.convertForDBParam(jsonParams.commitDate, 'DomDate');
+          }
+
+          var sqlParams = {orderId,commitDate};
+
+
+          let persistedCheckInItems = "";
+          persistedCheckInItems += " 	SELECT Order_Item__c.Id AS pKey ";
+          persistedCheckInItems += " 	,'0'  AS isAddedMissingUoMItem ";
+          persistedCheckInItems += " 	,Order_Item__c.UoM__c AS uom ";
+          persistedCheckInItems += " 	,Order_Item__c.Quantity__c AS quantity ";
+          persistedCheckInItems += " 	,Order_Item__c.Target_Quantity__c AS targetQuantity ";
+          persistedCheckInItems += " 	,Order_Item__c.Suggested_Quantity__c AS suggestedQuantity ";
+          persistedCheckInItems += " 	,Order_Item__c.Product__c AS productId ";
+          persistedCheckInItems += " 	,Order_Item__c.Modification_Reason__c AS modificationReason ";
+          persistedCheckInItems += " 	,Order_Item__c.Price__c AS price ";
+          persistedCheckInItems += " 	,Order_Item__c.Price_Receipt__c AS priceReceipt ";
+          persistedCheckInItems += " 	,Order_Item__c.Base_Price__c AS basePrice ";
+          persistedCheckInItems += " 	,Order_Item__c.Value__c AS value ";
+          persistedCheckInItems += " 	,Order_Item__c.Value_Receipt__c AS valueReceipt ";
+          persistedCheckInItems += " 	,Order_Item__c.Gross_Value_Receipt__c AS grossValueReceipt ";
+          persistedCheckInItems += " 	,Order_Item__c.Order_Item_Template__c AS orderItemTemplateId ";
+          persistedCheckInItems += " 	,Order_Item__c.Product__c || Order_Item__c.Order_Item_Template__c  AS referenceId ";
+          persistedCheckInItems += " 	,Order_Item__c.Order__c AS orderId ";
+          persistedCheckInItems += " 	,Order_Item__c.Check_In_Reason_Code__c AS checkInReasonCode ";
+          persistedCheckInItems += " 	,Order_Item__c.Left_Quantity__c AS leftQuantity ";
+          persistedCheckInItems += " 	,Product2.Description_1_#Language#__c AS description1 ";
+          persistedCheckInItems += " 	,Product2.Short_Description_#Language#__c AS shortDescription ";
+          persistedCheckInItems += " 	,Product2.GTIN__c AS gtin ";
+          persistedCheckInItems += " 	,Product2.Consumer_Goods_Product_Code__c AS consumerGoodsProductCode ";
+          persistedCheckInItems += " 	,Product2.Product_Type__c AS productType ";
+          persistedCheckInItems += " 	,Product2.Criterion_3_Product_Description__c AS criterion3ProductDescription ";
+          persistedCheckInItems += " 	,Product_Condition__c.Value__c AS simplePricingBasePrice ";
+          persistedCheckInItems += " 	,Unit_Of_Measure__c.Sort__c AS sort ";
+          persistedCheckInItems += " 	,Unit_Of_Measure__c.Is_Order_Unit__c AS isOrderUnit ";
+          persistedCheckInItems += " 	,PriceUnit.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnitForBasePrice";
+          persistedCheckInItems += " 	,Unit_Of_Measure__c.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnit";
+          persistedCheckInItems += " 	,Unit_Of_Measure__c.Is_Price_Unit__c AS isPriceUnit ";
+          persistedCheckInItems += "  ,Order_Item_Template__c.Price_Effect__c AS priceEffect";
+          persistedCheckInItems += "  ,Order_Item_Template__c.Short_Text__c AS orderItemTemplateShortText";
+          persistedCheckInItems += "  ,Order_Item_Template__c.Description_#Language#__c AS orderItemTemplateText";
+          persistedCheckInItems += " FROM Order_Item__c ";
+          persistedCheckInItems += " INNER JOIN Product2 ON Order_Item__c.Product__c = Product2.Id ";
+          persistedCheckInItems += " INNER JOIN Unit_Of_Measure__c ON Unit_Of_Measure__c.Product__c = Order_Item__c.Product__c ";
+          persistedCheckInItems += " INNER JOIN Product_Condition__c ON Order_Item__c.Product__c = Product_Condition__c.Product__c ";
+          persistedCheckInItems += " INNER JOIN Condition_Template__c ON Condition_Template__c.Id = Product_Condition__c.Condition_Template__c ";
+          persistedCheckInItems += " INNER JOIN Order_Item_Template__c ON Order_Item_Template__c.Id = Order_Item__c.Order_Item_Template__c ";
+          persistedCheckInItems += " INNER JOIN Unit_of_Measure__c AS PriceUnit ON Order_Item__c.Product__c = PriceUnit.Product__c ";
+          persistedCheckInItems += " 	AND Unit_Of_Measure__c.Unit_Type__c = Order_Item__c.UoM__c ";
+          persistedCheckInItems += " WHERE 1 = 1 ";
+          persistedCheckInItems += " 	AND Order_Item__c.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Product2.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Unit_Of_Measure__c.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Product_Condition__c.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Condition_Template__c.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Order_Item_Template__c.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND PriceUnit.IsDeleted <> '1' ";
+          persistedCheckInItems += " 	AND Order_Item__c.Order__c = '#orderId#' ";
+          persistedCheckInItems += " 	AND PriceUnit.Is_Price_Unit__c = '1' ";
+          persistedCheckInItems += "  AND #compareAsDate('Product_Condition__c.Valid_From__c', 'Date','<=' , #commitDate#, 'Date')# ";
+          persistedCheckInItems += "  AND #compareAsDate('Product_Condition__c.Valid_Thru__c', 'Date','>=' ,#commitDate#, 'Date')# ";
+          persistedCheckInItems += "  AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_Type__c AND System_Setting__c.Name = 'Default_Price_Type' AND System_Setting__c.IsDeleted <> '1') ";
+          persistedCheckInItems += "  AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_List_Type__c AND System_Setting__c.Name = 'Default_Price_List_Type' AND System_Setting__c.IsDeleted <> '1') ";
+
+          //create prepared statement
+          return Utils.replaceMacrosParam(persistedCheckInItems, sqlParams);
+
+        ]]>
+      </CheckIn_PersistedItems>
+      <CheckIn_InventoryEntries>
+        <![CDATA[
+
+        // ####################################################################################
+        // ## Prepared CheckIn items out of given inventory config (per order item template) ##
+        // ####################################################################################
+
+        //This statement is used to select relevant inventory entries for check-in docs
+        //This statement is a kind of template. It is used per inventory.
+        //The function BoInventoryDocument.FetchCheckInItems is shaping a sql snippetout of this 
+        //template and hands it over to CheckInItems statement.
+
+        //prepare params
+        let orderItemTemplateText = Utils.convertForDBParam(jsonParams.orderItemTemplateText, 'DomId');
+        let orderItemTemplateShortText = Utils.convertForDBParam(jsonParams.orderItemTemplateShortText, 'DomId');
+        let orderItemTemplateId = Utils.convertForDBParam(jsonParams.orderItemTemplateId, 'DomPKey');
+        let orderItemTemplatePriceEffect = Utils.convertForDBParam(jsonParams.orderItemTemplatePriceEffect, 'DomSdoItemMetaPriceEffect');
+        let inventoryTemplateId = Utils.convertForDBParam(jsonParams.inventoryTemplateId, 'DomPKey');
+        let userId = Utils.convertForDBParam(jsonParams.userId, 'DomPKey');
+        let accountId = Utils.convertForDBParam(jsonParams.accountId, 'DomPKey');
+        let tourId = Utils.convertForDBParam(jsonParams.tourId, 'DomPKey');
+        let vehicleId = Utils.convertForDBParam(jsonParams.vehicleId, 'DomPKey');
+
+        let sqlParams = {
+          orderItemTemplateText,
+          orderItemTemplateShortText,
+          orderItemTemplateId,
+          orderItemTemplatePriceEffect,
+          inventoryTemplateId, 
+          userId, 
+          accountId, 
+          tourId, 
+          vehicleId
+        };
+ 
+        //Statement to fetch the inventory records for given inventory params
+        var inventoryStmt = "";
+        inventoryStmt += "     SELECT";
+        inventoryStmt += "       #orderItemTemplateText# as orderItemTemplateText,";
+        inventoryStmt += "       #orderItemTemplateShortText# as orderItemTemplateShortText,";
+        inventoryStmt += "       #orderItemTemplateId# as orderItemTemplateId,";
+        inventoryStmt += "       #orderItemTemplatePriceEffect# as orderItemTemplatePriceEffect,";
+        inventoryStmt += "       Inventory__c.Product__c as productId,";
+        inventoryStmt += "       SUM(";
+        inventoryStmt += "         CASE";
+        inventoryStmt += "           WHEN Inventory_Transaction__c.Amount__c IS NULL THEN 0.0";
+        inventoryStmt += "           ELSE Inventory_Transaction__c.Amount__c";
+        inventoryStmt += "         END";
+        inventoryStmt += "       ) AS balance,";
+        inventoryStmt += "       Case";
+        inventoryStmt += "         WHEN Inventory_Control_Measure__c = 'Qty/Order Unit' then (";
+        inventoryStmt += "           Select";
+        inventoryStmt += "             Unit_of_Measure__c.Id";
+        inventoryStmt += "           from";
+        inventoryStmt += "             Unit_of_Measure__c";
+        inventoryStmt += "           where";
+        inventoryStmt += "             Unit_of_Measure__c.product__c = Inventory__c.Product__c";
+        inventoryStmt += "             AND Unit_of_Measure__c.Is_Order_Unit__c = '1'";
+        inventoryStmt += "         )";
+        inventoryStmt += "         Else (";
+        inventoryStmt += "           Select";
+        inventoryStmt += "             Unit_of_Measure__c.Id";
+        inventoryStmt += "           from";
+        inventoryStmt += "             Unit_of_Measure__c";
+        inventoryStmt += "           where";
+        inventoryStmt += "             Unit_of_Measure__c.product__c = Inventory__c.Product__c";
+        inventoryStmt += "             AND Unit_of_Measure__c.Is_Consumer_Unit__c = '1'";
+        inventoryStmt += "         )";
+        inventoryStmt += "       End As 'isInventoryUom'";
+        inventoryStmt += "     FROM";
+        inventoryStmt += "       Inventory__c";
+        inventoryStmt += "       INNER JOIN Inventory_Transaction__c ON Inventory__c.Id = Inventory_Transaction__c.Inventory__c ";
+        inventoryStmt += "       INNER JOIN Inventory_Transaction_Template__c ON Inventory_Transaction__c.Inventory_Transaction_Template__c = Inventory_Transaction_Template__c.Id ";
+        inventoryStmt += "       AND Inventory__c.Phase__c = 'Active'";
+        inventoryStmt += "       AND Inventory__c.SALES_ORG__C = '#SALESORG#'";
+        inventoryStmt += "       AND Inventory__c.Inventory_Template__c = #inventoryTemplateId#";
+        inventoryStmt += "       AND Inventory__c.User__c = #userId#";
+        inventoryStmt += "       AND Inventory__c.Account__c = #accountId#";
+        inventoryStmt += "       AND Inventory__c.Tour__c = #tourId#";
+        inventoryStmt += "       AND Inventory__c.Vehicle__c = #vehicleId#";
+        inventoryStmt += "       AND Inventory__c.Invalid__c = '0'";
+        inventoryStmt += "       AND Inventory_Transaction__c.Accounted__c = '0'";
+        inventoryStmt += "       AND Inventory__c.IsDeleted <> '1' ";
+        inventoryStmt += "       AND Inventory_Transaction__c.IsDeleted <> '1' ";
+        inventoryStmt += "       AND Inventory_Transaction_Template__c.IsDeleted <> '1' ";
+        inventoryStmt += "       AND (";
+        inventoryStmt += "         Inventory_Transaction_Template__c.Transaction_Control__c <> 'Neutral'";
+        inventoryStmt += "         OR Inventory_Transaction_Template__c.Transaction_Type__c = 'Balance'";
+        inventoryStmt += "       )";
+        inventoryStmt += "     GROUP BY";
+        inventoryStmt += "       Inventory__c.Id";
+        inventoryStmt += "     HAVING";
+        inventoryStmt += "       balance > 0.0";
+
+
+        //create prepared statement
+        return Utils.replaceMacrosParam(inventoryStmt, sqlParams);
+         ]]>
+      </CheckIn_InventoryEntries>
+      <CheckIn_Prepopulation>
+        <![CDATA[
+
+        // ###################################################
+        // ## Final chckIn item statement for prepopulation ##
+        // ###################################################
+
+        //Statement select inventory items
+        //Inner statement to fetch inventory records is handed over by BoInventoryDocument.FetchCheckInItems
+
+        var commitDate = "";
+        if (Utils.isDefined(jsonParams.commitDate)){
+          commitDate = Utils.convertForDBParam(jsonParams.commitDate, 'DomDate');
+        }
+
+        var sqlParams = {commitDate};
+
+        var sqlStmt_Pre = "";
+        sqlStmt_Pre += "Select";
+        sqlStmt_Pre += "   ' ' AS pKey,";
+        sqlStmt_Pre += "   '0' AS isAddedMissingUoMItem,";
+        sqlStmt_Pre += "   Unit_Of_Measure__c.Unit_Type__c AS uom,";
+        //fill only balance if current uom is the uom of the inventory
+        sqlStmt_Pre += "   Case";
+        sqlStmt_Pre += "     WHEN Unit_Of_Measure__c.Id = Inventory.isInventoryUom Then Inventory.Balance";
+        sqlStmt_Pre += "     ELSE 0";
+        sqlStmt_Pre += "   END as 'targetQuantity',";
+        sqlStmt_Pre += "   0 AS suggestedQuantity,";
+        sqlStmt_Pre += "   Inventory.productId as productId,";
+        sqlStmt_Pre += "   ' ' AS modificationReason,";
+        sqlStmt_Pre += "   0 AS price,";
+        sqlStmt_Pre += "   0 AS priceReceipt,";
+        sqlStmt_Pre += "   0 AS basePrice,";
+        sqlStmt_Pre += "   0 AS value,";
+        sqlStmt_Pre += "   0 AS valueReceipt,";
+        sqlStmt_Pre += "   0 AS grossValueReceipt,";
+        sqlStmt_Pre += "   Inventory.orderItemTemplateId AS orderItemTemplateId,";
+        sqlStmt_Pre += "   Inventory.productId || Inventory.orderItemTemplateId AS referenceId,";
+        sqlStmt_Pre += "   ' ' AS orderId,";
+        sqlStmt_Pre += "   Product2.Description_1_Language_1__c AS description1,";
+        sqlStmt_Pre += "   Product2.Short_Description_Language_1__c AS shortDescription,";
+        sqlStmt_Pre += "   Product2.GTIN__c AS gtin,";
+        sqlStmt_Pre += "   Product2.Consumer_Goods_Product_Code__c AS consumerGoodsProductCode,";
+        sqlStmt_Pre += "   Product2.Product_Type__c AS productType,";
+        sqlStmt_Pre += "   Product2.Criterion_3_Product_Description__c AS criterion3ProductDescription,";
+        sqlStmt_Pre += "   Product_Condition__c.Value__c  AS simplePricingBasePrice,";
+        sqlStmt_Pre += "   Unit_Of_Measure__c.Sort__c AS sort,";
+        sqlStmt_Pre += "   Unit_Of_Measure__c.Is_Order_Unit__c AS isOrderUnit,";
+        sqlStmt_Pre += "   PriceUnit.Pieces_per_Smallest_Unit__c AS  piecesPerSmallestUnitForBasePrice,";
+        sqlStmt_Pre += "   Unit_Of_Measure__c.Pieces_per_Smallest_Unit__c AS piecesPerSmallestUnit,";
+        sqlStmt_Pre += "   Unit_Of_Measure__c.Is_Price_Unit__c AS isPriceUnit,";
+        sqlStmt_Pre += "   Inventory.orderItemTemplatePriceEffect AS priceEffect,";
+        sqlStmt_Pre += "   Case";
+        sqlStmt_Pre += "     WHEN Unit_Of_Measure__c.Id = Inventory.isInventoryUom Then '1'";
+        sqlStmt_Pre += "     ELSE '0'";
+        sqlStmt_Pre += "   END as 'isInventoryUom',";
+        sqlStmt_Pre += "   Inventory.orderItemTemplateText AS 'orderItemTemplateText',";
+        sqlStmt_Pre += "   Inventory.orderItemTemplateShortText AS 'orderItemTemplateShortText'";
+        sqlStmt_Pre += " from";
+        sqlStmt_Pre += "   (";
+        
+        var sqlStmt_Post = "";
+        sqlStmt_Post += "     ORDER BY";
+        sqlStmt_Post += "       Inventory__c.Product__c ASC";
+        sqlStmt_Post += "   ) as 'Inventory'";
+        sqlStmt_Post += "   INNER JOIN Product2 ON Inventory.productId = Product2.Id";
+        sqlStmt_Post += "   INNER JOIN Unit_Of_Measure__c ON Inventory.productId = Unit_Of_Measure__c.Product__c";
+        sqlStmt_Post += "   INNER JOIN Product_Condition__c ON Inventory.productId = Product_Condition__c.Product__c ";
+        sqlStmt_Post += "   INNER JOIN Condition_Template__c ON Condition_Template__c.Id = Product_Condition__c.Condition_Template__c ";
+        sqlStmt_Post += "   INNER JOIN Unit_of_Measure__c AS PriceUnit ON Inventory.productId = PriceUnit.Product__c ";
+        sqlStmt_Post += "   AND (Unit_Of_Measure__c.Order_Ability__c = '1' OR Unit_Of_Measure__c.Pieces_per_Smallest_Unit__c = 1)";
+        sqlStmt_Post += "   AND Product2.IsDeleted <> '1' ";
+        sqlStmt_Post += "   AND Unit_Of_Measure__c.IsDeleted <> '1' ";
+        sqlStmt_Post += "   AND Product_Condition__c.IsDeleted <> '1' ";
+        sqlStmt_Post += "   AND Condition_Template__c.IsDeleted <> '1' ";
+        sqlStmt_Post += "   AND PriceUnit.IsDeleted <> '1' ";
+        sqlStmt_Post += " 	AND PriceUnit.Is_Price_Unit__c = '1' ";
+        sqlStmt_Post += "   AND #compareAsDate('Product_Condition__c.Valid_From__c', 'Date','<=' , #commitDate#, 'Date')# ";
+        sqlStmt_Post += "   AND #compareAsDate('Product_Condition__c.Valid_Thru__c', 'Date','>=' ,#commitDate#, 'Date')# ";
+        sqlStmt_Post += "   AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_Type__c AND System_Setting__c.Name = 'Default_Price_Type' AND System_Setting__c.IsDeleted <> '1') ";
+        sqlStmt_Post += "  AND EXISTS (SELECT NULL FROM System_Setting__c WHERE System_Setting__c.Value__c = Product_Condition__c.Price_List_Type__c AND System_Setting__c.Name = 'Default_Price_List_Type' AND System_Setting__c.IsDeleted <> '1') ";
+        sqlStmt_Post += " ORDER BY referenceId ASC, ";
+        sqlStmt_Post += " 	     Unit_Of_Measure__c.Is_Order_Unit__c DESC, ";
+        sqlStmt_Post += " 	     Unit_Of_Measure__c.Sort__c ASC ";
+        
+
+        //create prepared statement
+        var sqlPost =  Utils.replaceMacrosParam(sqlStmt_Post,  sqlParams);
+        jsonParams.params = jsonParams.params.concat(sqlPost.params);
+        
+        //no need to call Utils.replaceMacrosParam for sqlStmt_Pre and sqlStmt_Post
+        //because these SQL snippets contain no macros/params
+        var finalSql = sqlStmt_Pre + jsonParams.finalInventoryItemsSQL + sqlPost.sql;
+        return {sql: finalSql, params: jsonParams.params};
+
+        ]]>
+      </CheckIn_Prepopulation>
+    </Custom>
+  </Database>
+</Datasource>

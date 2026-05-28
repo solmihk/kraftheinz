@@ -1,0 +1,12 @@
+<ValidationMessages name="BoTourDataMessages" businessObject="BoTour" schemaVersion="">
+    <ValidationMessage name="ValidatePlannedTourStartEndDate" defaultMessage="Planned Start Date can not be greater than Planned End Date" comment="validate tour date." />
+    <ValidationMessage name="ValidateWarehouseAndCoDriver" defaultMessage="Select an active user of the start warehouse as the co-driver." comment="validate warehouse and co-driver." />
+    <ValidationMessage name="ValidateOdometerStart" defaultMessage="Enter a valid odometer reading." comment="validate odometer Start." />
+    <ValidationMessage name="ValidateVehicleStatusStart" defaultMessage="Select a vehicle condition status." comment="validate vehicle status start." />
+    <ValidationMessage name="ValidateTruck" defaultMessage="Select a truck that’s an active vehicle for Start Warehouse." comment="validate truck." />
+    <ValidationMessage name="ValidateTrailer" defaultMessage="Select a trailer that’s an active vehicle for Start Warehouse." comment="validate trailer." />
+    <ValidationMessage name="Trailer1_Trailer2_Same_Validation" defaultMessage="You can’t select the same vehicle for Trailer 1 and Trailer2." comment="validate trailer 1 and trailer 2." />
+    <ValidationMessage name="ValidateEndTour" defaultMessage="Finish all End Tour activities before completing the tour" comment="validate tour end" />
+    <ValidationMessage name="ValidateOdometerEnd" defaultMessage="Enter a final odometer reading that’s greater than or equal to the initial odometer reading." comment="validate if final odometer reading is greater than or equal to initial odometer reading." />
+    <ValidationMessage name="ValidateVehicleStatusEnd" defaultMessage="Select the End Tour Condition Reason as the vehicle isn’t in good condition upon finishing the tour." comment="validate if End Tour Condition Reason is empty if vehicle is not in good condition." />
+</ValidationMessages>

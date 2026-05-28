@@ -1,0 +1,23 @@
+<DataSource name="DsLoTourSchedule" backendSystem="sf" businessObjectClass="LoTourSchedule" external="false" editableEntity="Tour__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Tour__c" column="Id" />
+    <Attribute name="description" table="Tour__c" column="Description__c" />
+    <DateTimeAttribute dateName="dateFrom" timeName="timeFrom" table="Tour__c" column="Start_Date_Time__c" />
+    <Attribute name="status" table="Tour__c" column="Status__c" />
+    <DerivedAttribute name="visitCount" value="(SELECT COUNT(Visit.Id) FROM Visit WHERE Visit.Tour__c = Tour__c.Id AND Visit.IsDeleted = 0)" /> 
+    <DerivedAttribute name="statusIcon" value="CASE WHEN Tour__c.Status__c = 'Completed' THEN 'Status_Completed' WHEN Tour__c.Status__c = 'Running' THEN 'Status_Running' WHEN Tour__c.Status__c = 'Canceled' THEN 'Status_Canceled' ELSE 'Status_Open' END" /> 
+  </Attributes>
+  <Entities>
+    <Entity name="Tour__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Tour__c.Default_Driver__c= '#UserPKey#'
+      AND Tour__c.Status__c != 'Canceled'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="Tour__c" attribute="Start_Date_Time__c" direction="DESC" />
+  </OrderCriteria>
+  <Parameters />
+</DataSource>

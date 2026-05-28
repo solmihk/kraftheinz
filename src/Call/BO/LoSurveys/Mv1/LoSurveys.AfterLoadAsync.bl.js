@@ -1,0 +1,236 @@
+"use strict";
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//                 IMPORTANT - DO NOT MODIFY AUTO-GENERATED CODE OR COMMENTS                 //
+//Parts of this file are auto-generated and modifications to those sections will be          //
+//overwritten. You are allowed to modify:                                                    //
+// - the tags in the jsDoc as described in the corresponding section                         //
+// - the function name and its parameters                                                    //
+// - the function body between the insertion ranges                                          //
+//         "Add your customizing javaScript code below / above"                              //
+//                                                                                           //
+// NOTE:                                                                                     //
+// - If you have created PRE and POST functions, they will be executed in the same order     //
+//   as before.                                                                              //
+// - If you have created a REPLACE to override core function, only the REPLACE function will //
+//   be executed. PRE and POST functions will be executed in the same order as before.       //
+//                                                                                           //
+// - For new customizations, you can directly modify this file. There is no need to use the  //
+//   PRE, POST, and REPLACE functions.                                                       //
+//                                                                                           //
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Use the following jsDoc tags to describe the BL function. Setting these tags will
+ * change the runtime behavior in the mobile app. The values specified in the tags determine
+ * the name of the contract file. The filename format is “@this . @function .bl.js”.
+ * For example, LoVisit.BeforeLoadAsync.bl.js
+ * -> function: Name of the businessLogic function.
+ * -> this: The LO, BO, or LU object that this function belongs to (and it is part of the filename).
+ * -> kind: Type of object this function belongs to. Most common value is "businessobject".
+ * -> async: If declared as async then the function should return a promise.
+ * -> param: List of parameters the function accepts. Make sure the parameters match the function signature.
+ * -> module: Use CORE or CUSTOM. If you are a Salesforce client or an implementation partner, always use CUSTOM to enable a seamless release upgrade.
+ * -> maxRuntime: Maximum time this function is allowed to run, takes integer value in ms. If the max time is exceeded, error is logged.
+ * -> returns: Type and variable name in which the return value is stored.
+ * @function afterLoadAsync
+ * @this LoSurveys
+ * @kind TODO_ADD_BUSINESS_OBJECT_TYPE
+ * @async
+ * @namespace CORE
+ * @param {Object} result
+ * @param {Object} context
+ * @returns promise
+ */
+function afterLoadAsync(result, context){
+    var me = this;
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                           //
+    //               Add your customizing javaScript code below.                                 //
+    //                                                                                           //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    
+
+var params = context.jsonQuery;
+var boJobManager = params.boJobManager;
+
+if (params.posId !== " ") {
+	// Correct POS information of loaded items
+
+	//Get All POS for clbPosCheckPKeys
+	var posList = boJobManager.getLoPOS().getItemsByParamArray([{
+					"posId" : " ",
+					"op" : "NE"
+				}
+			]);
+	var dicPOSCheck = Utils.createDictionary();
+	var idx = posList.length;
+	var element;
+	while (idx--) {
+		element = posList[idx];
+		dicPOSCheck.add(element.getBpaMainPKey(), element.getPKey());
+	}
+
+	var listArray = result.getItemsByParamArray([{
+					"posId" : " ",
+					"op" : "NE"
+				}, {
+					"clbMainPKey" : boJobManager.getClbMainPKey(),
+					"op" : "NE"
+				}
+			]);
+	var clbPOSCheckPKey = "";
+
+	idx = listArray.length;
+	while (idx--) {
+		element = listArray[idx];
+		clbPOSCheckPKey = dicPOSCheck.get(element.getClbPOSCheckPKey());
+		element.setClbPOSCheckPKey(clbPOSCheckPKey);
+		element.setPosId(clbPOSCheckPKey);
+		element.setObjectStatus(this.self.STATE_UNMODIFIED);
+	}
+
+	result.setObjectStatus(this.self.STATE_UNMODIFIED);
+	result.orderBy({
+		"sort" : "ASC"
+	});
+}
+
+// Remove duplicate surveys after POS correction
+var initialSurveys = me.getAllItems();
+var finalSurveys = [];
+var surveysDict = {};
+
+// Keys collected only for logging purposes
+var surveyKeys = [
+	"bpaMainPKey",
+	"clbMainPKey",
+	"clbPOSCheckPKey",
+	"defaultValue",
+	"done",
+	"history",
+	"jobDefListPKey",
+	"jobDefinitionListText",
+	"jobDefinitionMetaPKey",
+	"jobDefinitionPKey",
+	"jobListPKey",
+	"jobMetaPKey",
+	"lastValue",
+	"listed",
+	"mandatory",
+	"manual",
+	"pKey",
+	"pOS",
+	"planned",
+	"posId",
+	"prdMainPKey",
+	"prdPOSContentPKey",
+	"surveyText",
+	"targetValue",
+	"value",
+	"visitDate",
+	"visitTime"
+];
+
+me.removeAllItems();
+
+function printSurveyFields(surveyData) {
+	var printObj = {};
+	for (var i = 0; i < surveyKeys.length; i++) {
+		var keyName = surveyKeys[i];
+		printObj[keyName] = surveyData[keyName];
+	}
+	AppLog.info(JSON.stringify(printObj));
+}
+
+for (var i = 0; i < initialSurveys.length; i++) {
+	var currentSurvey = initialSurveys[i];
+	var surveyUniqueKey =
+		currentSurvey.getJobDefinitionPKey() +
+		"+" +
+		currentSurvey.getJobListPKey() +
+		"+" +
+		currentSurvey.getPrdMainPKey() +
+		"+" +
+		(currentSurvey.posId ? currentSurvey.posId : "");
+
+	if (surveysDict[surveyUniqueKey]) {
+		var id1 = currentSurvey.getPKey();
+		var id2 = surveysDict[surveyUniqueKey].getPKey();
+
+		AppLog.warn(
+			"Duplicate survey found. Skipping display in the UI. id1 - " +
+				id1 +
+				" id2 - " +
+				id2
+		);
+
+		AppLog.info("First Survey --> ");
+		printSurveyFields(currentSurvey.getData());
+
+		AppLog.info("Second Survey --> ");
+		printSurveyFields(surveysDict[surveyUniqueKey].getData());
+	} else {
+		surveysDict[surveyUniqueKey] = currentSurvey;
+		finalSurveys.push(currentSurvey);
+	}
+}
+
+me.addItems(finalSurveys);
+
+if (params.pushToPOSListAfterLoad && params.pushToPOSListAfterLoad === true)
+{
+  var currentPOSList = boJobManager.getLoPOS().getItemsByParamArray([{
+					"posId" : params.posId,
+					"op" : "EQ"
+				}
+			]);
+   if (currentPOSList.length > 0)
+   {
+     currentPOSList[0].setSurveys(result);
+   }
+}
+
+// Set jobDefinitionListText and sort for matrix surveys (empty jobDefinitionPKey)
+// jobDefinitionListText is used for grouoing in right side panel in survey list UI
+// sort and groupSort is used for sorting in survey list UI
+var sStandardActivities = Localization.resolve('surveyStandardACtivities');
+var loSurveyColumns = boJobManager.getLoSurveyColumns();
+var allSurveys = result.getAllItems();
+
+for (var surveyIdx = 0; surveyIdx < allSurveys.length; surveyIdx++) {
+  var survey = allSurveys[surveyIdx];
+
+	//do that only for saved survey questions (means empty jobDefinitionPKey and jobListPKey)
+  if (Utils.isEmptyString(survey.getJobDefinitionPKey()) && Utils.isEmptyString(survey.getJobListPKey())) {
+    
+		//set standard activities label (used for grouping in right side panel in survey list UI)
+		survey.setJobDefinitionListText(sStandardActivities);
+
+    // Set sort (used for item sorting in activity group))
+    if (Utils.isDefined(loSurveyColumns)) {
+      var matchingSurveyColumns = loSurveyColumns.getItemsByParam({
+        "jobDefinitionMetaPKey": survey.getJobDefinitionMetaPKey()
+      });
+      if (matchingSurveyColumns.length > 0) {
+        survey.setSort("" + matchingSurveyColumns[0].getDisplayColumnIndex());
+				survey.setGroupSort(" " + String(matchingSurveyColumns[0].getDisplayColumnIndex().padStart(5, "0")));
+      }
+    }
+
+		//do not save because aboce logic is only for display in survey list UI
+    survey.setObjectStatus(STATE.PERSISTED);
+  }
+}
+
+var promise = when.resolve(result);
+
+   
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                           //
+    //               Add your customizing javaScript code above.                                 //
+    //                                                                                           //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    return promise;
+}

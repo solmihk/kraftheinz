@@ -1,0 +1,239 @@
+<Process name="TourVisit::TourVisitMapProcess" defaultAction="LoadTourVisits" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="CardController" type="BoHelperTourCockpit" />
+        <Declaration name="TourBo" type="BoTourData" />
+        <Declaration name="TourVisits" type="LoTourVisits" />
+        <Declaration name="TourVisits_TimeVisibility" type="DomBool" />
+        <Declaration name="ContextMenuList" type="LoTourVisitContextMenu" />
+        <Declaration name="RunningVisitCount" type="LuRunningVisitCount" />
+        <Declaration name="CurrentUser" type="DomPKey" />
+        <Declaration name="CanStartVisit" type="DomBool" />
+        <!-- Map -->
+        <Declaration name="Map_ShowMapDetails" type="DomBool" />
+        <Declaration name="Map_DisplayTraffic" type="DomBool" />
+        <Declaration name="Map_DisplayRoute" type="DomBool" />
+        <Declaration name="Map_CurrentPosition" type="Object" /> 
+        <Declaration name="Map_Details" type="LuMapDetail" />
+        <Declaration name="SfReplicationCallbacks" type="BoSfReplicationCallbacks" />
+        <Declaration name="isHybridUser" type="DomBool" />
+      </Declarations>
+      <Parameters>
+        <Input name="TourId" type="DomPKey" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <!-- Card Controller-->
+      <Action name="CreateCardController" actionType="CREATE" type="BoHelperTourCockpit">
+        <Return name="ProcessContext::CardController" />
+      </Action>
+      <Action name="LoadBo" actionType="LOAD" type="BoTourData">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::TourId" />
+        </Parameters>
+        <Return name="ProcessContext::TourBo" />
+      </Action>
+      <!-- Map Configuration Start -->
+      <Action name="HideMapDetails" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="0" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::Map_ShowMapDetails" />
+      </Action>
+      <Action name="InitializeDisplayTrafficWithUserSetting" actionType="LOGIC" call="ApplicationContext::User.boUserSettings.getClbDisplayTrafficInMapMobility">
+        <Return name="ProcessContext::Map_DisplayTraffic" />
+      </Action>
+      <Action name="InitializeDisplayRouteWithUserSetting" actionType="LOGIC" call="ApplicationContext::User.boUserSettings.getClbDisplayRouteInMapMobility">
+        <Return name="ProcessContext::Map_DisplayRoute" />
+      </Action>
+      <Action name="CreateReplicationCallBacksBo" actionType="CREATE" type="BoSfReplicationCallbacks">
+        <Return name="ProcessContext::SfReplicationCallbacks" />
+      </Action>
+      <!-- Map Configuration End -->
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <!-- Tour Visits List Start -->
+      <Action name="LoadTourVisits" actionType="LOAD" type="LoTourVisits">
+        <Parameters>
+          <Input name="tourId" value="ProcessContext::TourId" />
+        </Parameters>
+        <Return name="ProcessContext::TourVisits" />
+        <TransitionTo action="GetTourVisits_TimeVisibility" />
+      </Action>
+      <Action name="GetTourVisits_TimeVisibility" actionType="LOGIC" call="ApplicationContext::User.boUserSettings.getClbAgendaDisplayTimeMobility">
+        <Return name="ProcessContext::TourVisits_TimeVisibility" />
+        <TransitionTo action="TourVisits_setEARights" />
+      </Action>
+      <Action name="TourVisits_setEARights" actionType="LOGIC" call="ProcessContext::TourVisits.setEARights">
+        <Parameters>
+          <Input name="timeVisibilty" value="ProcessContext::TourVisits_TimeVisibility" />
+        </Parameters>
+        <TransitionTo action="AssignResponsible" />
+      </Action>
+      <Action name="AssignResponsible" actionType="LOGIC" call="ApplicationContext::User.getPKey">
+        <Return name="ProcessContext::CurrentUser" />
+        <TransitionTo action="ShowTourVisitMap" />
+      </Action>
+      <!-- Tour Visits List End -->
+      <Action actionType="VIEW" name="ShowTourVisitMap">
+        <UIDescription>TourVisit::TourVisitMapUI</UIDescription>
+        <Events>
+          <Event name="loadGoogleMapDetails" action="GetCurrentPosition" />
+          <Event name="VisitItemSelected" action="VisitClicked" />
+          <Event name="ContextMenuOpening" action="ContextMenuOpening" />
+          <Event name="ContextMenuItemSelected" action="checkIfRunningInHybridMode" />
+        </Events>
+      </Action>
+      <Action name="checkIfRunningInHybridMode" actionType="LOGIC" call="ProcessContext::TourBo.checkIfRunningInHybridMode">
+        <Return name="ProcessContext::isHybridUser" />
+        <TransitionTo action="UserRoleDecision" />
+      </Action>
+      <Action name="UserRoleDecision" actionType="DECISION" parameter="ProcessContext::isHybridUser">
+        <Case value="true" action="CardTourVisits_contextMenuItemDecision" />
+        <CaseElse action="ExecuteContextMenuItemDecision" />
+      </Action>
+      <Action name="CardTourVisits_contextMenuItemDecision" actionType="LOGIC" call="ProcessContext::SfReplicationCallbacks.isDSDVisitOnDemandDataAvailable">
+        <Parameters>
+          <Input name="customerPKey" value="Event.customerId" />
+        </Parameters>
+        <Return name="ProcessContext::CallDataAvailable" />
+        <TransitionTo action="CallDataCheck_Decision" />
+      </Action>
+      <Action name="CallDataCheck_Decision" actionType="DECISION" parameter="ProcessContext::CallDataAvailable">
+        <Case value="1" action="ExecuteContextMenuItemDecision" />
+        <Case value="2" action="CardVisits_LoadingCallData" />
+        <CaseElse action="AskForDataRequest" />
+      </Action>
+      <Action name="ExecuteContextMenuItemDecision" actionType="DECISION" parameter="Event.selected">
+        <Case value="Start" action="StartVisit" />
+        <Case value="Open" action="OpenVisit" />
+        <Case value="Cancel" action="CancelVisit" />
+        <CaseElse action="checkVisitClickedAction" />
+      </Action>
+      <Action name="checkVisitClickedAction" actionType="DECISION" parameter="ProcessContext::VistAction" >
+        <Case value="visitClicked" action="OpenVisit" />
+        <CaseElse action="ShowTourVisitMap" />
+      </Action>
+      <Action name="AskForDataRequest" actionType="CONFIRM" confirmType="YesNo">
+        <Message messageId="CasConfirmLoadCallOnDemandData" />
+        <Cases>
+          <Case value="Yes" action="RequestCallData" />
+          <Case value="No" action="ShowTourVisitMap" />
+        </Cases>
+      </Action>
+      <Action name="CardVisits_LoadingCallData" actionType="CONFIRM" confirmType="Ok">
+        <Message messageId="CasCallDataLoadingInProgress" />
+        <Cases>
+          <Case value="Ok" action="ShowTourVisitMap" />
+        </Cases>
+      </Action>
+      <Action name="RequestCallData" actionType="LOGIC" call="ProcessContext::SfReplicationCallbacks.requestDSDVisitOnDemandDataAsync">
+        <Parameters>
+          <Input name="customerPKey" value="Event.customerId" />
+        </Parameters>
+        <TransitionTo action="ShowTourVisitMap" />
+      </Action>
+      <Action name="GetCurrentPosition" actionType="LOGIC" call="Utils.getCurrentPosition">
+        <Return name="ProcessContext::Map_CurrentPosition" />
+        <TransitionTo action="Map_LoadDetails" />
+      </Action>
+      <Action name="Map_LoadDetails" actionType="LOGIC" call="ProcessContext::TourVisits.prepareMapDetails">
+        <Parameters>
+          <Input name="visitPKey" value="event.pkey" />
+          <Input name="currentLatitude" value="ProcessContext::Map_CurrentPosition.latitude" />
+          <Input name="currentLongitude" value="ProcessContext::Map_CurrentPosition.longitude" />
+        </Parameters>
+        <Return name="ProcessContext::Map_Details" />
+        <TransitionTo action="Map_ShowDetails" />
+      </Action>
+      <Action name="Map_ShowDetails" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::Map_ShowMapDetails" />
+        <TransitionTo action="ShowTourVisitMap" />
+      </Action>
+      <Action actionType="LOGIC" name="ContextMenuOpening" call="Utils.identity">
+        <Return name="ProcessContext::VistAction" />
+        <Parameters>
+          <Input name="value" value="contextMenuClicked" type="Literal" />
+        </Parameters>
+        <TransitionTo action="GetRunningVisits"/>
+      </Action>
+      <Action name="GetRunningVisits" actionType="LOAD" type="LuRunningVisitCount">
+        <Return name="ProcessContext::RunningVisitCount" />
+        <TransitionTo action="CanVisitStart"/>
+      </Action>
+
+      <Action name="CanVisitStart" actionType="LOGIC" call="ProcessContext::CardController.canStartTourVisit">
+        <Parameters>
+          <Input name="tourId" value="ProcessContext::TourBo.pKey" />
+          <Input name="visitStatus" value="Event.visitStatus" />
+          <Input name="startTourActivitiesCompleted" value="ProcessContext::TourBo.startTourActivitiesCompleted" />
+          <Input name="runningVisitCount" value="ProcessContext::RunningVisitCount.runningVisitCount" />
+        </Parameters>
+        <Return name="ProcessContext::CanStartVisit" />
+        <TransitionTo action="VisitActionDecision"/>
+      </Action>
+
+      <Action name="VisitActionDecision" actionType="DECISION" parameter="ProcessContext::VistAction">
+        <Case value="visitClicked" action="checkIfRunningInHybridMode" />
+        <Case value="contextMenuClicked" action="GetContextMenu" />
+        <CaseElse action="ShowTourVisitMap" />
+      </Action>
+
+      <Action name="GetContextMenu" actionType="LOAD" type="LoTourVisitContextMenu">
+        <Return name="ProcessContext::ContextMenuList" />
+        <Parameters>
+          <Input name="canStartVisit" value="ProcessContext::CanStartVisit" />
+          <Input name="tourStatus" value="ProcessContext::TourBo.tourStatus" />
+          <Input name="visitStatus" value="Event.visitStatus" />
+        </Parameters>
+      </Action>
+
+      <Action name="ContextMenuItemDecision" actionType="DECISION" parameter="Event.selected">
+        <Case value="Start" action="StartVisit" />
+        <Case value="Open" action="OpenVisit" />
+        <CaseElse action="ShowTourVisitMap" />
+      </Action>
+      <Action name="StartVisit" actionType="PROCESS" process="Call::LoadCallProcess">
+        <Parameters>
+          <Input name="CallPKey" value="Event.pKey" />
+          <Input name="ResponsiblePKey" value="ProcessContext::CurrentUser" />
+          <Input name="ActionName" value="Start" type="Literal"/>
+          <Input name="IsCallFromDSD" value="true" type="Literal"/>
+          <Input name="CanStartVisit" value="false" type="Literal"/>
+        </Parameters>
+        <TransitionTo action="LoadTourVisits" />
+      </Action>
+      <Action name="OpenVisit" actionType="PROCESS" process="Call::LoadCallProcess">
+        <Parameters>
+          <Input name="CallPKey" value="Event.pKey" />
+          <Input name="ResponsiblePKey" value="ProcessContext::CurrentUser" />
+          <Input name="ActionName" value="Open" type="Literal"/>
+          <Input name="IsCallFromDSD" value="true" type="Literal"/>
+          <Input name="CanStartVisit" value="ProcessContext::CanStartVisit" />
+        </Parameters>
+        <TransitionTo action="LoadTourVisits" />
+      </Action>
+      <Action name="CancelVisit" actionType="PROCESS" process="Call::ChangeStatusWizardProcess">
+        <Parameters>
+          <Input name="MainPKey" value="Event.pKey" />
+          <Input name="ResponsiblePKey" value="ProcessContext::CurrentUser" />
+          <Input name="targetClbStatus" value="Abandoned" type="Literal" />
+        </Parameters>
+        <TransitionTo action="LoadTourVisits" />
+      </Action>
+      <Action actionType="LOGIC" name="VisitClicked" call="Utils.identity">
+        <Return name="ProcessContext::VistAction" />
+        <Parameters>
+          <Input name="value" value="visitClicked" type="Literal" />
+        </Parameters>
+        <TransitionTo action="GetRunningVisits"/>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

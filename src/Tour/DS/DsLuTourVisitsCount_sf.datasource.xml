@@ -1,0 +1,19 @@
+<DataSource name="DsLuTourVisitsCount" backendSystem="sf" businessObjectClass="LuTourVisitsCount" external="false" editableEntity="Visit" schemaVersion="2.0">
+  <!-- For more information about the supported properties and nodes see corresponding DataSource.md file under ~Workspace/contractSnippets/YourModuel Section/DS/DS_DataSource -->
+  <Attributes>
+    <DerivedAttribute name="tourVisitsCount" value="Count(*)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Visit" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+    Visit.Tour__c = '#tourPKey#'
+    AND Visit.Status NOT IN ('Completed', 'Abandoned')
+  ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters >
+    <Parameter name="tourPKey" type="TEXT" />
+  </Parameters>
+</DataSource>

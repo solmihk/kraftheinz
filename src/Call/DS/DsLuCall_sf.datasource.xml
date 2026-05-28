@@ -1,0 +1,16 @@
+<DataSource name="DsLuCall" backendSystem="sf" businessObjectClass="LuCall" external="false" editableEntity="Visit" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Visit" column="Id" />
+    <Attribute name="status" table="Visit" column="Status" />
+  </Attributes>
+  <Entities>
+    <Entity name="Visit" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition><![CDATA[
+        Visit.Id = #pKey#
+    ]]></QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="pKey" type="TEXT" />
+  </Parameters>
+</DataSource>

@@ -1,0 +1,42 @@
+<DataSource name="DsLoTourVisits" backendSystem="sf" businessObjectClass="LoTourVisits" external="false" editableEntity="Visit" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Visit" column="Id" />
+    <DateTimeAttribute dateName="startDate" timeName="startTime" table="Visit" column="PlannedVisitStartTime" />
+    <Attribute name="customerId" table="Visit" column="AccountId" />
+    <Attribute name="status" table="Visit" column="status" />
+    <Attribute name="customerName" table="Account" column="Name" />
+    <DerivedAttribute name="customerAddress" value="trim(Account.ShippingStreet) || ', ' || Account.ShippingCity" />
+    <Attribute name="latitude" table="Account" column="ShippingLatitude" />
+    <Attribute name="longitude" table="Account" column="ShippingLongitude" />
+    <Attribute name="bpaMainPKey" table="Account" column="Id" />
+    <DerivedAttribute name="documentCount" value="(Select count(id) from Order__c where Order__c.Visit__c = Visit.Id)" />
+    <DerivedAttribute name="visitTypeImage" value="'ClbTypeStatus_' || Visit_Template__c.Meta_Type__c || '_' || Visit.Status" />
+  </Attributes>
+  <Entities>
+    <Entity name="Visit" alias="" idAttribute="Id" />
+    <Entity name="Visit_Template__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Visit.Visit_Template__c" comparator="eq" rightSideType="Attribute" rightSideValue="Visit_Template__c.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="Account" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Visit.AccountId" comparator="eq" rightSideType="Attribute" rightSideValue="Account.Id" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition><![CDATA[
+    Visit.Tour__c = #tourId#
+    ]]>
+  </QueryCondition>
+  <OrderCriteria>
+    <OrderCriterion entity="Visit" attribute="PlannedVisitStartTime" direction="ASC" />
+  </OrderCriteria>
+  <Parameters>
+    <Parameter name="tourId" type="TEXT" />
+  </Parameters>
+</DataSource>

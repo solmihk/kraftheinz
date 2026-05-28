@@ -1,0 +1,34 @@
+<BusinessObject name="BoItemSettings" generateLoadMethod="false" generateCreateMethod="false" schemaVersion="1.1">
+  <DataSource name="DsBoItemSettings"/>
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey"/>
+    <SimpleProperty name="currentScanIncrementQuantity" type="DomInteger" storable="false" />
+    <SimpleProperty name="barcodeScanBehavior" type="DomSdoBarcodeScanBehavior" storable="false" />
+    <SimpleProperty name="uoMScanBehavior" type="DomSdoUoMScanBehavior" storable="false" >
+      <Events>
+        <Event name="onChanged" eventHandler="onUoMScanBehaviorChanged"/>
+      </Events>
+    </SimpleProperty>
+    <SimpleProperty name="uoMScanDefaultUnit" type="DomPrdLogisticUnit" storable="false" />
+    <SimpleProperty name="currentItemMeta" type="DomPKey" storable="false" />
+  </SimpleProperties>
+  <NestedObjects/>
+  <ObjectLookups>
+    <ObjectLookup name="luOrderItemMeta" objectClass="LuOrderItemMeta" />
+  </ObjectLookups>
+  <ListObjects/>
+  <Methods>
+    <Method name="beforeSaveAsync"/>
+    <Method name="afterSaveAsync"/>
+    <Method name="beforeLoadAsync"/>
+    <Method name="afterLoadAsync"/>
+    <Method name="beforeInitialize"/>
+    <Method name="afterInitialize"/>
+    <Method name="beforeDoValidateAsync"/>
+    <Method name="afterDoValidateAsync"/>
+    <Method name="beforeCreateAsync"/>
+    <Method name="afterCreateAsync"/>
+    <Method name="setEARight"/>
+    <Method name="onUoMScanBehaviorChanged"/>
+  </Methods>
+</BusinessObject>

@@ -1,0 +1,78 @@
+<DataSource name="DsBoInventoryDocument" backendSystem="sf" businessObjectClass="BoInventoryDocument" readOnly="false" external="false" editableEntity="Order__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Order__c" column="Id" />
+    <Attribute name="name" table="Order__c" column="Name"/>
+    <Attribute name="phase" table="Order__c" column="Phase__c"/>
+    <Attribute name="orderDate" table="Order__c" column="Order_Date__c"/>
+    <Attribute name="warehouse" table="startWarehouse" column="Name"/>
+    <Attribute name="warehouseId" table="startWarehouse" column="Id"/>
+    <DerivedAttribute name="tourStartWarehouseId" value="startWarehouse.Id"/>
+    <DerivedAttribute name="tourEndWarehouseId" value="endWarehouse.Id"/>
+    <Attribute name="orderTemplateId" table="Order__c" column="Order_Template__c"/>
+    <Attribute name="tourId" table="Order__c" column="Tour__c"/>
+    <Attribute name="documentType" table="Order__c" column="Document_Type__c"/>
+    <Attribute name="truckId" table="Tour__c" column="Truck__c" />
+    <Attribute name="orderAccountId" table="Order__c" column="Order_Account__c" />
+    <Attribute name="inventoryReference1Id" table="Order__c" column="Inventory_Reference_1__c" />
+    <Attribute name="inventoryReference2Id" table="Order__c" column="Inventory_Reference_2__c" />
+    <Attribute name="inventoryReference3Id" table="Order__c" column="Inventory_Reference_3__c" />
+    <Attribute name="inventoryReference4Id" table="Order__c" column="Inventory_Reference_4__c" />
+    <Attribute name="inventoryReference5Id" table="Order__c" column="Inventory_Reference_5__c" />
+    <Attribute name="releaseTime" table="Order__c" column="Release_Time__c" />
+    <Attribute name="orderId" table="Order__c" column="Order_Id__c" />
+    <Attribute name="grossTotalValue" table="Order__c" column="Gross_Total_Value__c" />
+    <Attribute name="grossTotalValueReceipt" table="Order__c" column="Gross_Total_Value_Receipt__c" />
+    <Attribute name="totalValue" table="Order__c" column="Total_Value__c" />
+    <Attribute name="totalValueReceipt" table="Order__c" column="Value__c" />
+    <Attribute name="calculationStatus" table="Order__c" column="Calculation_Status__c" />
+    <Attribute name="releaseGeolocationLatitude" table="Order__c" column="Release_Geolocation__Latitude__s" />
+    <Attribute name="releaseGeolocationLongitude" table="Order__c" column="Release_Geolocation__Longitude__s" />
+    <DerivedAttribute name="actualStatePKey" value="Order__c.Phase__c" />
+    <Attribute name="sf_mobilityRelease" table="Order__c" column="Mobility_Release__c" />
+    <Attribute name="responsiblePKey" table="Order__c" column="Responsible__c" />
+    <DerivedAttribute name="ResponsiblePKey" value="' '" />
+    <Attribute name="ownerPKey" table="Order__c" column="Accountable__c" />
+    <DerivedAttribute name="nextStatePKey" value="' '" />
+    <DerivedAttribute name="wfeWorkflowPKey" value="Order_Template__c.Workflow__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Order__c" alias="" idAttribute="Id" />
+    <Entity name="Order_Template__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Order_Template__c.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Order__c.Order_Template__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="Tour__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Tour__c.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Order__c.Tour__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="Warehouse__c" alias="startWarehouse">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="startWarehouse.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Tour__c.Start_Warehouse__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="Warehouse__c" alias="endWarehouse">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="endWarehouse.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Tour__c.End_Warehouse__c" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+      Order__c.Id='#inventoryDocumentId#'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters >
+    <Parameter name="inventoryDocumentId" type="TEXT" />
+  </Parameters>
+</DataSource>

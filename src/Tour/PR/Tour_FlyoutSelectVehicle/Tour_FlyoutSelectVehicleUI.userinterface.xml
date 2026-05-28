@@ -1,0 +1,44 @@
+<UIDescription name="Tour::FlyoutSelectVehicleUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionDialogPage" onBackDiscard="true">
+    <PageHeader>
+      <Bindings>
+        <Resource target="title" type="Label" id="VehicleLookupTitleId" defaultLabel="Vehicle" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem directlyVisible="true" itemId="ClearVehicleLookup">
+          <Bindings>
+            <Resource target="Text" type="Label" id="ClearVehicle" defaultLabel="Clear" />
+            <Resource target="Icon" type="Image" id="Clear_Vehicle" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="clearVehicle"></ButtonPressedEvent>
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Area areaName="mainArea" areaPattern="SingleElementArea">
+        <GroupedList name="VehicleList" dataSource="ProcessContext::VehicleList.Items[]">
+          <Items name="Items" itemPattern="TourVehicleListItem">
+            <Bindings>
+              <Binding target="vehicleDescription" type="Text" binding=".description" bindingMode="ONE_WAY" />
+            </Bindings>
+            <MenuItems></MenuItems>
+            <ItemListLayout>
+              <Col>
+                <Row layoutType="itemValueSmall itemLeft" bindingId="vehicleDescription" />
+              </Col>
+            </ItemListLayout>
+          </Items>
+          <Events>
+            <ItemSelectedEvent event="itemSelected">
+              <Params>
+                <Param name="vehicleId" value=".pKey" />
+              </Params>
+            </ItemSelectedEvent>
+          </Events>
+        </GroupedList>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>

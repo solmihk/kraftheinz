@@ -1,0 +1,17 @@
+<DataSource name="DsLoTourMessage" backendSystem="sf" businessObjectClass="LoTourMessage" external="false" editableEntity="Tour__c" schemaVersion="2.0">
+  <!-- For more information about the supported properties and nodes see corresponding DataSource.md file under ~Workspace/contractSnippets/YourModuel Section/DS/DS_DataSource -->
+  <Attributes>
+    <Attribute name="pKey" table="Tour__c" column="Id" />
+    <Attribute name="message" table="Tour__c" column="Message__c" />
+  </Attributes>
+  <Entities>
+    <Entity name="Tour__c" alias="" idAttribute="Id" />
+  </Entities>
+  <QueryCondition><![CDATA[
+    Tour__c.Id = #pKey#
+    ]]></QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="pKey" type="TEXT" />
+  </Parameters>
+</DataSource>

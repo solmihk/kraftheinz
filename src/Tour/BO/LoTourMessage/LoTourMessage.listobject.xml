@@ -1,0 +1,12 @@
+<ListObject name="LoTourMessage" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLoTourMessage" />
+  <Item objectClass="LiTourMessage" />
+  <Methods>
+    <Method name="beforeSaveAsync" />
+    <Method name="afterSaveAsync" />
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="afterDoValidateAsync" />
+    <Method name="beforeDoValidateAsync" />
+  </Methods>
+</ListObject>

@@ -1,0 +1,4 @@
+<ListObject name="LoVisitsByVisitStatus" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLoVisitsByVisitStatus" />
+  <Item objectClass="LiVisitsByVisitStatus" />
+</ListObject>

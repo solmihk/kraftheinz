@@ -1,0 +1,65 @@
+<ListItem name="LiInventoryDocumentItems">
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" dataSourceProperty="pKey" />
+    <SimpleProperty name="uom" type="DomPrdLogisticUnit" dataSourceProperty="uom" />
+    <!-- quantity must be DomDecimal so that linked steppers work! -->
+    <SimpleProperty name="quantity" type="DomDecimal" dataSourceProperty="quantity" />
+    <SimpleProperty name="targetQuantity" type="DomInteger" dataSourceProperty="targetQuantity" />
+    <SimpleProperty name="suggestedQuantity" type="DomInteger" dataSourceProperty="suggestedQuantity" />
+    <SimpleProperty name="leftQuantity" type="DomInteger" dataSourceProperty="leftQuantity" />
+    <SimpleProperty name="productId" type="DomPKey" dataSourceProperty="productId" />
+    <SimpleProperty name="modificationReason" type="DomSdoModReason" dataSourceProperty="modificationReason" />
+    <SimpleProperty name="price" type="DomMoney" dataSourceProperty="price" />
+    <SimpleProperty name="priceReceipt" type="DomMoney" dataSourceProperty="priceReceipt" />
+    <SimpleProperty name="value" type="DomMoney" dataSourceProperty="value" />
+    <SimpleProperty name="valueReceipt" type="DomMoney" dataSourceProperty="valueReceipt" />
+    <SimpleProperty name="grossValueReceipt" type="DomMoney" dataSourceProperty="grossValueReceipt" />
+    <SimpleProperty name="orderItemTemplateId" type="DomPKey" dataSourceProperty="orderItemTemplateId" />
+    <SimpleProperty name="description1" type="DomText" dataSourceProperty="description1" />
+    <SimpleProperty name="shortDescription" type="DomText" dataSourceProperty="shortDescription" />
+    <SimpleProperty name="gtin" type="DomPrdNumber" dataSourceProperty="gtin" />
+    <SimpleProperty name="consumerGoodsProductCode" type="DomPrdNumber" dataSourceProperty="consumerGoodsProductCode" />
+    <SimpleProperty name="productType" type="DomPrdType" dataSourceProperty="productType" />
+    <SimpleProperty name="criterion3ProductDescription" type="DomText" dataSourceProperty="criterion3ProductDescription" />
+    <SimpleProperty name="sort" type="DomInteger" dataSourceProperty="sort" />
+    <SimpleProperty name="isOrderUnit" type="DomBool" dataSourceProperty="isOrderUnit" />
+    <SimpleProperty name="groupSort" type="DomInteger" dataSourceProperty="sort" />
+    <SimpleProperty name="referenceId" type="DomText" dataSourceProperty="referenceId" />
+    <SimpleProperty name="isAddedMissingUoMItem" type="DomBool" dataSourceProperty="isAddedMissingUoMItem" />
+    <SimpleProperty name="orderId" type="DomPKey" dataSourceProperty="orderId" />
+    <SimpleProperty name="piecesPerSmallestUnit" type="DomInteger" dataSourceProperty="piecesPerSmallestUnit" />
+    <SimpleProperty name="piecesPerSmallestUnitForBasePrice" type="DomInteger" dataSourceProperty="piecesPerSmallestUnitForBasePrice"/>
+    <SimpleProperty name="isPriceUnit" type="DomBool" dataSourceProperty="isPriceUnit" />
+    <SimpleProperty name="basePrice" type="DomMoney" dataSourceProperty="basePrice" />
+    <SimpleProperty name="simplePricingBasePrice" type="DomMoney" dataSourceProperty="simplePricingBasePrice" />
+    <SimpleProperty name="grossValue" type="DomMoney" dataSourceProperty="grossValue" />
+    <SimpleProperty name="priceEffect" type="DomSdoItemMetaPriceEffect" dataSourceProperty="priceEffect" />
+    <SimpleProperty name="specialPriceReceipt" type="DomMoney" dataSourceProperty="specialPriceReceipt" />
+    <SimpleProperty name="basePriceReceipt" type="DomMoney" dataSourceProperty="basePriceReceipt" />
+    <SimpleProperty name="discount" type="DomPercentage" dataSourceProperty="discount" />
+    <SimpleProperty name="grossTotalValue" type="DomMoney" dataSourceProperty="grossTotalValue" />
+    <SimpleProperty name="grossTotalValueReceipt" type="DomMoney" dataSourceProperty="grossTotalValueReceipt" />
+    <SimpleProperty name="isInventoryUom" type="DomBool" dataSourceProperty="isInventoryUom"/>
+    <SimpleProperty name="orderItemTemplateShortText" type="DomId" dataSourceProperty="orderItemTemplateShortText"/>
+    <SimpleProperty name="checkInReasonCode" type="DomSdoCheckInReasonCode" dataSourceProperty="checkInReasonCode" />
+
+    <!-- Non-DB props / UI uom and difference info -->
+    <SimpleProperty name="orderUnitInformation" type="DomText"/>
+    <SimpleProperty name="additionalUnitsInformation" type="DomText"/>
+    <SimpleProperty name="quantityDifferenceInformation" type="DomInteger"/>
+    <!--  Non-DB props / Mark invalid items
+     A seperarate flag is needed on mainList because main list does only show isOrderUnit = 1
+     BUT also main list item should be marked as invalid if a related uOm item (not visible in main list) is invalid.
+     Because both lists are linked and synced via weak references we cannot use the same flag.
+    -->
+    <SimpleProperty name="missingModReason" type="DomBool" />
+    <SimpleProperty name="iconModReason" type="DomString" />
+    <SimpleProperty name="missingModReasonMainList" type="DomBool" />
+    <SimpleProperty name="iconModReasonMainList" type="DomString" />
+    <SimpleProperty name="mainItemReference" type="DomPKey" />
+    <!--  Non-DB props / Needed for adding products + calculation + inventory handling -->
+    <SimpleProperty name="mergeEngine_invalidated" type="DomText" />
+    <SimpleProperty name="inventoryInformationList" type="Object" />
+    <SimpleProperty name="inventoryBalance" type="DomDecimal" />
+  </SimpleProperties>
+</ListItem>

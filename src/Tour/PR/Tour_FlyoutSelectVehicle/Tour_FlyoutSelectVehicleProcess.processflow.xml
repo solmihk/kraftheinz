@@ -1,0 +1,43 @@
+<Process name="Tour::FlyoutSelectVehicleProcess" defaultAction="ShowFlyoutSelectVehicleUI" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="VehicleList" type="LoVehicleByWarehouse" />
+      </Declarations>
+      <Parameters>
+        <Input name="WarehouseId" type="DomPKey" />
+        <Input name="VehicleTypes" type="String" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="GetVehicleList" actionType="LOAD" type="LoVehicleByWarehouse">
+        <Parameters>
+          <Input name="WarehouseId" value="ProcessContext::WarehouseId" />
+          <Input name="VehicleTypes" value="ProcessContext::VehicleTypes" />
+        </Parameters>
+        <Return name="ProcessContext::VehicleList" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="VIEW" name="ShowFlyoutSelectVehicleUI">
+        <UIDescription>Tour::FlyoutSelectVehicleUI</UIDescription>
+        <Events>
+          <Event name="itemSelected" action="AssignVehicleId" />
+          <Event name="clearVehicle" action="ClearVehicle" />
+        </Events>
+      </Action>
+      <Action actionType="END" name="ClearVehicle">
+        <ReturnValues>
+          <Return name="vehicleId" type="Literal" value="Clear" />
+        </ReturnValues>
+      </Action>
+      <Action actionType="END" name="AssignVehicleId">
+        <ReturnValues>
+          <Return name="vehicleId" value="Event.vehicleId" />
+        </ReturnValues>
+      </Action>
+    </Actions>
+  </Body>
+</Process>

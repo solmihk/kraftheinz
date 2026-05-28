@@ -1,0 +1,74 @@
+<Process name="Application::StartProcess" defaultAction="GetSFUserId" schemaVersion="0.0.0.5" >
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="passwordValid" type="DomBool" />
+        <Declaration name="loginNameValid" type="DomBool" />
+        <Declaration name="isDemoApp" type="DomBool" />
+        <Declaration name="loginName" type="String" />
+        <Declaration name="luSysInitialValues" type="LuSysInitialValues" />
+        <Declaration name="loRolesOfUser" type="LoRolesOfCurrentUser" />
+        <Declaration name="boTimeCard" type="BoUserDailyReport" />
+        <Declaration name="breakRunning" type="Object" />
+        <Declaration name="sfUserId" type="String" />
+      </Declarations>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="GetInitSystemValues" actionType="LOAD" type="LuSysInitialValues">
+        <Return name="ProcessContext::luSysInitialValues" />
+      </Action>
+      <Action name="CreateChartHelperBo" actionType="CREATE" type="BoChartHelper">
+        <Return name="ApplicationContext::chartHelper" />
+      </Action>
+      <Action name="CreateDateTimeHelperBo" actionType="CREATE" type="BoDateTimeHelper">
+        <Return name="ApplicationContext::dateTimeHelper" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action actionType="LOGIC" name="GetSFUserId" call="Facade.getSfUserId">
+        <Return name="ProcessContext::sfUserId" />
+        <TransitionTo action="SfLoadBoUser" />
+      </Action>
+      <Action name="SfLoadBoUser" actionType="LOAD" type="BoUser">
+        <Parameters>
+          <Input name="sfUserId" value="ProcessContext::sfUserId" />
+        </Parameters>
+        <Return name="ApplicationContext::User" />
+        <TransitionTo action="ConnectBluetoothDevice" />
+      </Action>
+      <Action  name="ConnectBluetoothDevice" actionType="LOGIC" call="ApplicationContext::User.boUserSettings.connectBluetoothDevice">
+        <Parameters>
+          <Input name="deviceType" value="ApplicationContext::User.boUserSettings.mobileBluetoothDevice" />
+        </Parameters>
+        <TransitionTo action="PostSfLogin" />
+      </Action>
+      <Action name="PostSfLogin" actionType="LOGIC" call="ApplicationContext::User.login">
+        <TransitionTo action="LoadSfUserFavorites" />
+      </Action>
+      <Action name="LoadSfUserFavorites" actionType="LOGIC" call="Facade.loadAdvancedSearchFavoritesAsync">
+        <TransitionTo action="LoadLuSalesOrg" />
+      </Action>
+      <Action name="LoadLuSalesOrg" actionType="LOAD" type="LuSalesOrg">
+        <Return name="ApplicationContext::SalesOrg" />
+        <TransitionTo action="LoadLoRolesOfUser" />
+      </Action>
+      <Action name="LoadLoRolesOfUser" actionType="LOAD" type="LoRolesOfCurrentUser">
+        <Return name="ProcessContext::loRolesOfUser" />
+        <TransitionTo action="SetUserRoles" />
+      </Action>
+      <Action name="SetUserRoles" actionType="LOGIC" call="ApplicationContext::User.setRolesFromListObject">
+        <Parameters>
+          <Input name="listObject" value="ProcessContext::loRolesOfUser" />
+          <Input name="roleProperty" type="Literal" value="usrRoleId" />
+        </Parameters>
+        <TransitionTo action="SetDSDModeFlag" />
+      </Action>
+      <Action name="SetDSDModeFlag" actionType="LOGIC" call="ApplicationContext::User.setRunningInDSDModeToAppContext">
+        <TransitionTo action="ShowDashboard" />
+      </Action>
+      <Action actionType="PROCESS" name="ShowDashboard" process="Application::DashboardDecisionProcess"/>
+    </Actions>
+  </Body>
+</Process>

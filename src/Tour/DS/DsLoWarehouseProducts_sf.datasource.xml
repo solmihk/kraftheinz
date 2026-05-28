@@ -1,0 +1,84 @@
+<DataSource name="DsLoWarehouseProducts" backendSystem="sf" businessObjectClass="LoWarehouseProducts" external="false" editableEntity="Warehouse_Product__c" schemaVersion="2.0">
+  <Attributes>
+    <Attribute name="pKey" table="Warehouse_Product__c" column="Id" />
+    <Attribute name="warehouseId" table="Warehouse_Product__c" column="Warehouse__c" />
+    <Attribute name="productId" table="Warehouse_Product__c" column="Product__c" />
+    <Attribute name="isActive" table="Warehouse_Product__c" column="Active__c" />
+    <Attribute name="productName" table="Product2" column="Name" />
+    <Attribute name="productDescription1" table="Product2" column="Description_1_#Language#__c" />
+    <Attribute name="consumerGoodsProductCode" table="Product2" column="Consumer_Goods_Product_Code__c" />
+    <Attribute name="gtin" table="Product2" column="GTIN__c" />
+    <Attribute name="category" table="Product2" column="Category__c" />
+    <Attribute name="productType" table="Product2" column="Product_Type__c" />
+    <DerivedAttribute name="groupingAttribute" value="SUBSTR(Description_1_#Language#__c,1,1)" />
+  </Attributes>
+  <Entities>
+    <Entity name="Warehouse_Product__c" alias="" idAttribute="Id" />
+    <Entity name="Product2" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Warehouse_Product__c.Product__c" comparator="eq" rightSideType="Attribute" rightSideValue="Product2.Id" />
+          <Condition leftSideValue="Product2.State__c" comparator="eq" rightSideType="Literal"  rightSideValue="'4'"/>
+          <Condition leftSideValue="Product2.Delivery_Valid_From__c" comparator="le" rightSideType="Attribute" rightSideValue="'#TodayAsDate#'" />
+          <Condition leftSideValue="Product2.Delivery_Valid_Thru__c" comparator="ge" rightSideType="Attribute" rightSideValue="'#TodayAsDate#'" />
+        </SimpleJoin>
+      </Join>
+    </Entity>
+    <Entity name="Unit_Of_Measure__c" alias="">
+      <Join Type="inner">
+        <SimpleJoin>
+          <Condition leftSideValue="Product2.Id" comparator="eq" rightSideType="Attribute" rightSideValue="Unit_Of_Measure__c.Product__c" />
+          <Condition leftSideValue="Unit_Of_Measure__c.Is_Order_Unit__c" comparator="eq" rightSideType="Literal"  rightSideValue="'1'"/>
+        </SimpleJoin>
+      </Join>
+    </Entity>
+  </Entities>
+  <QueryCondition>
+    <![CDATA[
+    Warehouse_Product__c.Warehouse__c='#warehouseId#'
+    AND
+    Warehouse_Product__c.Active__c='1'
+    ]]>
+  </QueryCondition>
+  <OrderCriteria />
+  <Parameters>
+    <Parameter name="warehouseId" type="TEXT" />
+    <Parameter name="consumerGoodsProductCodeId" type="TEXT" />
+    <Parameter name="consumerGoodsProductCodeIdComp" type="TEXT" />
+    <Parameter name="productDescription1Comp" type="TEXT" />
+    <Parameter name="productDescription1" type="TEXT" />
+    <Parameter name="categoryComp" type="TEXT" />
+    <Parameter name="category" type="TEXT" />
+    <Parameter name="gtinComp" type="TEXT" />
+    <Parameter name="gtin" type="TEXT" />
+    <Parameter name="productTypeComp" type="TEXT" />
+    <Parameter name="productType" type="TEXT" />
+  </Parameters>
+  <ConditionalParameters>
+    <ConditionalParameter name="consumerGoodsProductCodeId">
+      <SimpleConditions>
+        <Condition leftSideValue="Product2.Consumer_Goods_Product_Code__c" comparator="#consumerGoodsProductCodeIdComp#" rightSideType="Attribute" rightSideValue="'#consumerGoodsProductCodeId#'" />
+      </SimpleConditions>
+    </ConditionalParameter>
+    <ConditionalParameter name="productDescription1">
+      <SimpleConditions>
+        <Condition leftSideValue="Product2.Description_1_#Language#__c" comparator="#productDescription1Comp#" rightSideType="Attribute" rightSideValue="'#productDescription1#'" />
+      </SimpleConditions>
+    </ConditionalParameter>
+    <ConditionalParameter name="category">
+      <SimpleConditions>
+        <Condition leftSideValue="Product2.Category__c" comparator="#categoryComp#" rightSideType="Attribute" rightSideValue="'#category#'" />
+      </SimpleConditions>
+    </ConditionalParameter>
+    <ConditionalParameter name="gtin">
+      <SimpleConditions>
+        <Condition leftSideValue="Product2.GTIN__c" comparator="#gtinComp#" rightSideType="Attribute" rightSideValue="'#gtin#'" />
+      </SimpleConditions>
+    </ConditionalParameter>
+    <ConditionalParameter name="productType">
+      <SimpleConditions>
+        <Condition leftSideValue="Product2.Product_Type__c" comparator="#productTypeComp#" rightSideType="Attribute" rightSideValue="'#productType#'" />
+      </SimpleConditions>
+    </ConditionalParameter>
+  </ConditionalParameters>
+</DataSource>

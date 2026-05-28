@@ -1,0 +1,237 @@
+<Process name="InventoryDocument::ItemTabProcess" defaultAction="ShowUI_Decision" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <Declaration name="TourDataBo" type="BoTourData" />
+        <Declaration name="ProductId" type="DomPKey" />
+        <Declaration name="CurrentTabPage" type="String" />
+        <Declaration name="ValidationResult" type="String" />
+        <Declaration name="MainOrderItemTemplate" type="Object" />
+        <Declaration name="ScanProcessCompleted" type="String" />
+        <Declaration name="ScanProduct_UoM" type="DomPrdLogisticUnit" />
+        <Declaration name="ScanProduct_Success" type="String" />
+        <Declaration name="ScanProduct_PrdMainPKey" type="DomPKey" />
+        <Declaration name="Default_UoM" type="String" />
+        
+      </Declarations>
+      <Parameters>
+        <Input name="BoInventoryDocument" type="BoInventoryDocument" />
+      </Parameters>
+    </ProcessContext>
+    <EntryActions>
+      <Action name="LoadBo" actionType="LOAD" type="BoTourData">
+        <Parameters>
+          <Input name="pKey" value="ProcessContext::BoInventoryDocument.tourId" />
+        </Parameters>
+        <Return name="ProcessContext::TourDataBo" />
+      </Action>
+      <Action actionType="LOGIC" name="LoadMainOrderItemTemplate" call="ProcessContext::BoInventoryDocument.getMainOrderItemTemplate">
+        <Return name="ProcessContext::MainOrderItemTemplate" />
+      </Action>
+      <Action actionType="LOGIC" name="SetScanProcess_Initial" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <Return name="ProcessContext::ScanProcessCompleted" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <Action name="ShowView" actionType="VIEW">
+        <UIDescription>InventoryDocument::ItemTabUI</UIDescription>
+        <Events>
+          <Event name="InventoryDocumentItemList_itemSelected" action="MarkInvalidItems"/>
+          <Event name="addProduct" action="AddProducts"/>
+          <Event name="addProductViaScanner" action="AddProductViaScanner" />
+        </Events>
+      </Action> 
+      <Action name="MarkInvalidItems" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.markInvalidItems">
+        <TransitionTo action="FillUnitOfMeasureList" />
+      </Action>
+      <Action name="FillUnitOfMeasureList" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.fillUnitOfMeasureList">
+        <Parameters>
+          <Input name="productId" value="Event.productId" />
+          <Input name="defaultUom" value="ProcessContext::Default_UoM" />
+          <Input name="orderItemTemplateId" value="Event.orderItemTemplateId" />
+        </Parameters>
+        <TransitionTo action="clearDefaultUom" />
+      </Action>
+      <Action name="clearDefaultUom" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::Default_UoM" />
+        <Parameters>
+          <Input name="value" value=" " />
+        </Parameters>
+      </Action>
+      <Action name="AddProducts" actionType="PROCESS" process="Tour::AddProductProcess">
+        <Parameters>
+          <Input name="warehouseId" value="ProcessContext::TourDataBo.startWarehouseId" />
+        </Parameters>
+        <ReturnValues>
+          <Return name="ProcessContext::ProductId" value="selectedProductId" />
+        </ReturnValues>
+        <TransitionTo action="CheckOutDocumentAddProductAction" />
+      </Action>
+      <Action name="CheckOutDocumentAddProductAction" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.addProductCheckOutDocument">
+        <Parameters>
+          <Input name="selectedProductId" value="ProcessContext::ProductId" />
+        </Parameters>
+        <TransitionTo action="ShowUI_Decision" />
+      </Action>
+      <Action actionType="END" name="EndCancel" />
+      <!-- Modeler Scan Product Start -->
+      <Action name="AddProductViaScanner" actionType="PROCESS" process="Product::ScanProductProcess">
+        <Parameters>
+          <Input name="uoMScanBehavior" value="ProcessContext::MainOrderItemTemplate.uoMScanBehavior" />
+          <Input name="uoMScanDefaultUnit" value="ProcessContext::MainOrderItemTemplate.uoMScanDefaultUnit" />
+          <Input name="processType" type="Literal" value="TruckLoad" />
+        </Parameters>
+        <TransitionTo action="ScanProduct_Result_Decision" />
+        <ReturnValues>
+          <Return name="ProcessContext::ScanProduct_PrdMainPKey" value="ProductPKey" />
+          <Return name="ProcessContext::ScanProduct_UoM" value="ProductUoM" />
+          <Return name="ProcessContext::ScanProduct_Success" value="Success" />
+        </ReturnValues>
+      </Action>
+      <Action name="ScanProduct_Result_Decision" actionType="DECISION" parameter="ProcessContext::ScanProduct_Success">
+        <Case value="1" action="GetUoMListForScannedProduct" />
+        <CaseElse action="ShowUI_Decision" />
+      </Action>
+      <Action name="GetUoMListForScannedProduct" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.getAvailableUoMForProduct">
+        <Return name="ProcessContext::ProductUoMList" />
+        <TransitionTo action="DetermineLogisticUnit" />
+        <Parameters>
+          <Input name="productId" value="ProcessContext::ScanProduct_PrdMainPKey" />
+          <Input name="orderItemTemplate" value="ProcessContext::MainOrderItemTemplate" />
+        </Parameters>
+      </Action>
+      <Action name="DetermineLogisticUnit" actionType="DECISION" parameter="ProcessContext::MainOrderItemTemplate.uoMScanBehavior">
+        <Case value="Standard" action="GetDefaultUoMForScannedProduct" />
+        <Case value="Barcode" action="GetUoMFromScannedProduct" />
+        <Case value="Current" action="GetUoMFromTemplate" />
+        <CaseElse action="GetDefaultUoMForScannedProduct" />
+      </Action>
+      <Action name="GetDefaultUoMForScannedProduct" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.getDefaultUoMForProduct">
+        <Return name="ProcessContext::Default_UoM" />
+        <TransitionTo action="ScanProduct_ValidateProduct" />
+        <Parameters>
+          <Input name="availableUnits" value="ProcessContext::ProductUoMList" />
+          <Input name="itemTemplate" value="ProcessContext::MainOrderItemTemplate" />
+        </Parameters>
+      </Action>
+      <Action name="GetUoMFromScannedProduct" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::Default_UoM" />
+        <TransitionTo action="ScanProduct_ValidateProduct" />
+        <Parameters>
+          <Input name="value" value="ProcessContext::ScanProduct_UoM" />
+        </Parameters>
+      </Action>
+      <Action name="GetUoMFromTemplate" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::Default_UoM" />
+        <TransitionTo action="ScanProduct_ValidateProduct" />
+        <Parameters>
+          <Input name="value" value="ProcessContext::MainOrderItemTemplate.uoMScanDefaultUnit" />
+        </Parameters>
+      </Action>
+      <Action name="ScanProduct_ValidateProduct" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.validateScannedProduct">
+        <Return name="ProcessContext::ScanProduct_IsValid" />
+        <TransitionTo action="ScanProduct_ValidateProduct_Decision" />
+        <Parameters>
+          <Input name="productId" value="ProcessContext::ScanProduct_PrdMainPKey" />
+          <Input name="currentUoM" value="ProcessContext::Default_UoM" />
+          <Input name="availableUoM" value="ProcessContext::ProductUoMList" />
+        </Parameters>
+      </Action>
+      <Action name="ScanProduct_ValidateProduct_Decision" actionType="DECISION" parameter="ProcessContext::ScanProduct_IsValid">
+        <Case value="valid" action="AddScannedProductsToItemList" />
+        <CaseElse action="ShowUI_Decision" />
+      </Action>
+      <Action name="AddScannedProductsToItemList" actionType="LOGIC" call="ProcessContext::BoInventoryDocument.addScannedDocumentItems">
+        <Return name="ProcessContext::AlreadySelectedProd" />
+        <TransitionTo action="AlredySelectedProd_Decision" />
+        <Parameters>
+          <Input name="productId" value="ProcessContext::ScanProduct_PrdMainPKey" />
+          <Input name="itemTemplate" value="ProcessContext::MainOrderItemTemplate" />
+          <Input name="barcodeScanBehavior" value="ProcessContext::BoInventoryDocument.boOrderTemplate.barcodeScanBehavior" />
+          <Input name="scanIncrementQuantity" value="ProcessContext::MainOrderItemTemplate.scanIncrementQuantity" />
+          <Input name="uoM" value="ProcessContext::Default_UoM" />
+        </Parameters>
+      </Action>
+      <Action name="AlredySelectedProd_Decision" actionType="DECISION" parameter="ProcessContext::AlreadySelectedProd">
+        <Case value="true" action="clearDefaultUomShowView" />
+        <CaseElse action="ShowUI_Decision" />
+      </Action>
+      <Action name="clearDefaultUomShowView" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::Default_UoM" />
+        <Parameters>
+          <Input name="value" value="" />
+        </Parameters>
+        <TransitionTo action="ShowUI_Decision" />
+      </Action>
+      <!-- Modeler Scan Product End -->
+      <!-- Mobile Scan Product Start -->
+      <Action name="AddProductViaScanner_External_StatusDecision" actionType="DECISION" parameter="ProcessContext::ScanProcessCompleted">
+        <Case value="1" action="SetScanProcess_InProgress" />
+        <CaseElse action="ResetScanProcess_Initial" />
+      </Action>
+      <Action actionType="LOGIC" name="ResetScanProcess_Initial" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <Return name="ProcessContext::ScanProcessCompleted" />
+      </Action>
+      <Action actionType="LOGIC" name="SetScanProcess_InProgress" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="0" />
+        </Parameters>
+        <Return name="ProcessContext::ScanProcessCompleted" />
+        <TransitionTo action="AddProductViaScanner_External" />
+      </Action>
+      <Action name="AddProductViaScanner_External" actionType="PROCESS" process="Product::ScanProductProcess">
+        <Parameters>
+          <Input name="uoMScanBehavior" value="ProcessContext::MainOrderItemTemplate.uoMScanBehavior" />
+          <Input name="uoMScanDefaultUnit" value="ProcessContext::MainOrderItemTemplate.uoMScanDefaultUnit" />
+          <Input name="processType" type="Literal" value="TruckLoad" />
+          <Input name="externalEAN" value="event.code" />
+        </Parameters>
+        <TransitionTo action="SetScanProcess_Completed" />
+        <ReturnValues>
+          <Return name="ProcessContext::ScanProduct_PrdMainPKey" value="ProductPKey" />
+          <Return name="ProcessContext::ScanProduct_UoM" value="ProductUoM" />
+          <Return name="ProcessContext::ScanProduct_Success" value="Success" />
+        </ReturnValues>
+      </Action>
+      <Action actionType="LOGIC" name="SetScanProcess_Completed" call="Utils.identity">
+        <Parameters>
+          <Input name="value" type="Literal" value="1" />
+        </Parameters>
+        <Return name="ProcessContext::ScanProcessCompleted" />
+        <TransitionTo action="ScanProduct_Result_Decision" />
+      </Action>
+       <!-- Mobile Scan Product End -->
+       <Action name="ShowUI_Decision" actionType="DECISION" parameter="ProcessContext::BoInventoryDocument.documentType">
+        <Case value="ProductCheckIn" action="ShowCheckInItemTab" />
+        <CaseElse action="ShowItemTab" />
+      </Action>
+      <Action name="ShowItemTab" actionType="VIEW">
+        <UIDescription>InventoryDocument::ItemTabUI</UIDescription>
+        <Events>
+          <Event name="InventoryDocumentItemList_itemSelected" action="MarkInvalidItems"/>
+          <Event name="addProduct" action="AddProducts"/>
+          <Event name="addProductViaScanner" action="AddProductViaScanner" />
+        </Events>
+      </Action>
+      <Action name="ShowCheckInItemTab" actionType="VIEW">
+        <UIDescription>InventoryDocument::CheckInItemTabUI</UIDescription>
+        <Events>
+          <Event name="InventoryDocumentItemList_itemSelected" action="MarkInvalidItems"/>
+          <Event name="addProduct" action="AddProducts"/>
+          <Event name="addProductViaScanner" action="AddProductViaScanner" />
+        </Events>
+      </Action>
+    </Actions>
+  </Body>
+  <ExternalEvents>
+    <Event name="barcodeEvent" action="AddProductViaScanner_External_StatusDecision" />
+  </ExternalEvents>
+</Process>

@@ -1,0 +1,11 @@
+<LookupObject name="LuTourCountRemaining" generateLoadMethod="true" schemaVersion="1.1">
+  <DataSource name="DsLuTourCountRemaining" />
+  <SimpleProperties>
+    <SimpleProperty name="tourCountRemaining" type="DomInteger" dataSourceProperty="tourCountRemaining"></SimpleProperty>
+  </SimpleProperties>
+  <Methods>
+    <Method name="afterLoadAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="loadAsync" />
+  </Methods>
+</LookupObject>

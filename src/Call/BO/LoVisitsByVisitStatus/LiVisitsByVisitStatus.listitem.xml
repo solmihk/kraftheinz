@@ -1,0 +1,6 @@
+<ListItem name="LiVisitsByVisitStatus">
+  <SimpleProperties>
+    <SimpleProperty name="subject" type="DomText" dataSourceProperty="subject" />
+    <SimpleProperty name="plannedVisitStartTime" type="DomDateTime" dataSourceProperty="plannedVisitStartTime" />
+  </SimpleProperties>
+</ListItem>

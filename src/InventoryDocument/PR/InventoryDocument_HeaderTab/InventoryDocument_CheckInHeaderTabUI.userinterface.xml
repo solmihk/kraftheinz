@@ -1,0 +1,124 @@
+<UIDescription name="InventoryDocument::CheckInHeaderTabUI" schemaVersion="0.0.0.5">
+  <Page pagePattern="SingleSectionPage">
+    <PageHeader>
+      <Bindings>
+        <Binding target="title" type="Text" binding="ProcessContext::BoInventoryDocument.description" bindingMode="ONE_WAY" />
+      </Bindings>
+      <MenuItems>
+        <MenuItem directlyVisible="true" itemId="releaseOrder">
+          <Bindings>
+            <Resource target="Text" type="Label" id="releaseOrder" defaultLabel="Release" />
+            <Resource target="Icon" type="Image" id="Complete" defaultImage="Complete.png" />
+            <Binding type="Editable" target="Editable" call="ProcessContext::BoInventoryDocument.releaseButtonActive" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.releaseButtonVisible" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="releaseOrder" />
+          </Events>
+        </MenuItem>
+        <MenuItem directlyVisible="true" itemId="reviewReleaseInformation">
+          <Bindings>
+            <Resource target="Text" type="Label" id="reviewRelease" defaultLabel="Release Info" />
+            <Resource target="Icon" type="Image" id="CompleteDarkGrey24" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isReleaseInformationVisible" />
+            <Binding type="Visible" target="Visible" call="ProcessContext::BoInventoryDocument.isReleaseButtonVisible" />
+          </Bindings>
+          <Events>
+            <ButtonPressedEvent event="reviewReleaseInformation" />
+          </Events>
+        </MenuItem>
+      </MenuItems>
+    </PageHeader>
+    <Section sectionName="masterSection" sectionPattern="SingleAreaSection">
+      <Area areaName="Main" areaPattern="SingleElementArea">
+        <GroupElement name="IdentificationGroup">
+          <Bindings>
+            <Resource target="Title" type="Label" defaultLabel="Check-in Details" id="checkinDetailsLabelId" />
+          </Bindings>
+          <InputArea name="checkinDocumentType" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Document Type" id="checkinDocumentTypeLabelId" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.documentType.text" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+          <DatePickerField name="orderDate" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Created Date" id="dateLabelId" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.orderDate" bindingMode="ONE_WAY" />
+            </Bindings>
+          </DatePickerField>
+          <Lookup name="endWarehouse" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Warehouse" id="endWarehouseLabelId" />
+              <Binding target="Value" binding="ProcessContext::BoInventoryDocument.luTourEndWarehouse.description" bindingMode="ONE_WAY" />
+            </Bindings>
+          </Lookup>
+        </GroupElement>
+        <GroupElement name="InventoryValueDetailsGroup">
+          <Bindings>
+            <Resource target="Title" type="Label" id="valueSummaryDetailsLabelId" defaultLabel="Inventory Value Details" />
+          </Bindings>
+          <InputArea name="actualAmount" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Actual Return" id="actualAmountLabelId" />
+              <Binding target="Value" type="Decimal" formatV2="10.2" binding="ProcessContext::BoInventoryDocument.totalValue" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+          <InputArea name="currency" disabled="true">
+            <Bindings>
+              <Resource target="Label" type="Label" defaultLabel="Currency" id="currencyLabel" />
+              <Binding target="Value" binding="ApplicationContext::User.currency" bindingMode="ONE_WAY" />
+            </Bindings>
+          </InputArea>
+        </GroupElement>
+        <GroupedList name="loItemsUnitOfMeasureList" groupBy="orderItemTemplateText" dataSource="ProcessContext::DocumentUoMList.Items[]">
+          <TextBar name="TextBarInventoryDetails">
+            <Bindings>
+              <Binding target="text" type="Label" id="inventoryDetailsTitle" defaultLabel="Inventory Details" bindingMode="ONE_WAY" />
+            </Bindings>
+          </TextBar>
+          <Items name="Items" itemPattern="CheckinAggregatedQtySummaryItems">
+            <Bindings>
+              <Binding target="UnitOfMeasurement" type="Text" binding=".uom" bindingMode="ONE_WAY" />
+              <Binding target="ExpectedUnits" type="Decimal" formatV2="10.0" binding=".expectedUnits" bindingMode="ONE_WAY" />
+              <Binding target="ActualUnits" type="Decimal" formatV2="10.0" binding=".actualUnits" bindingMode="ONE_WAY" />
+              <Binding target="LeftQuantity" type="Decimal" formatV2="10.0" binding=".leftQuantity" bindingMode="ONE_WAY" />
+              <Binding target="DifferenceUnits" type="Decimal" formatV2="10.0" binding=".differenceUnits" bindingMode="ONE_WAY" />
+              <Resource target="TypeLabel" type="Label" id="typeLabelId" defaultLabel="Type" />
+              <Resource target="ExpectedLabel" type="Label" id="expectedLabelId" defaultLabel="Expected Return Qty" />
+              <Resource target="ActualLabel" type="Label" id="actualLabelId" defaultLabel="Actual Return Qty" />
+              <Resource target="LOVLabel" type="Label" id="lovLabelId" defaultLabel="LoV Qty" />
+              <Resource target="DifferenceLabel" type="Label" id="differenceLabelId" defaultLabel="Qty Difference" />
+            </Bindings>
+            <ItemListLayout>
+              <Default>
+                <Header>
+                  <Col bindingId="TypeLabel" align="left" />
+                  <Col bindingId="ExpectedLabel" align="left" />
+                  <Col bindingId="ActualLabel" align="left" />
+                  <Col bindingId="LOVLabel" align="left" />
+                  <Col bindingId="DifferenceLabel" align="left" />
+                </Header>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="UnitOfMeasurement" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="ExpectedUnits" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="ActualUnits" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="LeftQuantity" />
+                </Col>
+                <Col>
+                  <Row layoutType="itemValueSmall" bindingId="DifferenceUnits" />
+                </Col>
+              </Default>
+            </ItemListLayout>
+          </Items>
+        </GroupedList>
+      </Area>
+    </Section>
+  </Page>
+</UIDescription>
