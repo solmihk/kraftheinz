@@ -1,0 +1,76 @@
+name: Modeler Contracts CI
+
+on:
+  push:
+    branches:
+      - "*-cust"
+      - "*-cust-feature-*"
+  pull_request:
+    branches:
+      - "*-cust"
+
+jobs:
+  validate-build-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      TARGET_ORG_ALIAS: ci-org
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+
+      - name: Verify Salesforce CLI
+        run: sf --version
+
+      - name: Install Modeler CLI plugin
+        run: sf plugins install @salesforce/plugin-modeler
+
+      - name: Authenticate org (JWT)
+        env:
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_JWT_KEY: ${{ secrets.SF_JWT_KEY }}
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
+        run: |
+          test -n "$SF_CLIENT_ID"
+          test -n "$SF_USERNAME"
+          test -n "$SF_JWT_KEY"
+          test -n "$SF_INSTANCE_URL"
+          printf "%s" "$SF_JWT_KEY" > server.key
+          sf org login jwt \
+            --client-id "$SF_CLIENT_ID" \
+            --username "$SF_USERNAME" \
+            --jwt-key-file server.key \
+            --instance-url "$SF_INSTANCE_URL" \
+            --alias "$TARGET_ORG_ALIAS"
+          rm -f server.key
+
+      - name: Validate model
+        run: sf modeler validate --target-org "$TARGET_ORG_ALIAS"
+
+      - name: Build model
+        run: sf modeler build --target-org "$TARGET_ORG_ALIAS"
+
+      - name: Create deployment package
+        run: |
+          mkdir -p dist
+          sf modeler build \
+            --target-org "$TARGET_ORG_ALIAS" \
+            --deployment-zip ./dist/deployment.zip
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-zip
+          path: dist/deployment.zip
