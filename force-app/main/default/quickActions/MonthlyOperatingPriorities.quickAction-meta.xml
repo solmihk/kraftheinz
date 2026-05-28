@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Monthly Operating Priorities</label>
+    <lightningWebComponent>monthlyOperatingPriorities</lightningWebComponent>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <type>LightningWebComponent</type>
+    <actionSubtype>ScreenAction</actionSubtype>
+</QuickAction>

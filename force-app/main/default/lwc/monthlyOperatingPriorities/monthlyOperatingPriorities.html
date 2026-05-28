@@ -1,0 +1,78 @@
+<template>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <img src={logoUrl} alt="Kraft Heinz" class="logo" />
+                <h1 class="title">FreshCo Team Updates</h1>
+            </div>
+            <button class="close-button" onclick={handleClose}>
+                <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <template lwc:if={hasData}>
+                <template for:each={currentSections} for:item="section">
+                    <div key={section.name} class="section">
+                        <h2 class="section-header">{section.name}</h2>
+                        <div class="table-wrapper">
+                            <table class="priority-table">
+                                <thead>
+                                    <tr>
+                                        <template for:each={section.columns} for:item="col">
+                                            <th key={col.key} class={col.cssClass}>{col.label}</th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={section.rows} for:item="row">
+                                        <tr key={row.id}>
+                                            <template for:each={row.cells} for:item="cell">
+                                                <td key={cell.key} class={cell.cssClass}>{cell.value}</td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template lwc:elseif={isPlaceholderTab}>
+                <div class="placeholder">
+                    <p>Content coming soon for <strong>{activeTab}</strong></p>
+                </div>
+            </template>
+
+            <template lwc:elseif={error}>
+                <div class="error-message">
+                    <p>Error loading priorities: {error}</p>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+        </div>
+
+        <!-- Bottom Tab Bar -->
+        <div class="tab-bar">
+            <div class="tab-bar-inner">
+                <template for:each={tabs} for:item="tab">
+                    <button
+                        key={tab.name}
+                        class={tab.cssClass}
+                        data-tab={tab.name}
+                        onclick={handleTabClick}>
+                        {tab.name}
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>
